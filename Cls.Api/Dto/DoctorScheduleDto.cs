@@ -1,9 +1,11 @@
-﻿namespace Cls.Api.Dto
+﻿namespace Dto;
+
+public class DoctorScheduleDto
 {
-    public class DoctorScheduleDto
-    {
-        public int DoctorId { get; set; }
-        public string? DayOfWeek { get; set; } // e.g., "Monday", "Tuesday"
-        public string? WorkingHours { get; set; } // e.g., "9-5"
-    }
+    public int? DoctorId { get; set; }
+    public int? ClinicId { get; set; }
+    public DateOnly? Day { get; set; }
+    public TimeSpan? AvailableFrom { get; set; }
+    public TimeSpan? AvailableTo { get; set; }
+    public bool? Status { get; set; }
 }

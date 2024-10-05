@@ -1,7 +1,6 @@
-﻿namespace HospitalAPI.DTO
-{
+﻿namespace Dto;
+
 	public class SpecializationDto
 	{
-        public string? SpecializationName { get; set; }
-    }
+    public string? SpecializationName { get; set; }
 }

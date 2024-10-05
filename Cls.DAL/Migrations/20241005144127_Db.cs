@@ -6,41 +6,22 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Cls.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class @new : Migration
+    public partial class Db : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Address",
+                name: "Countries",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    governorate = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Address", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Doctors",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Specialty = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClinicAddress = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Doctors", x => x.Id);
+                    table.PrimaryKey("PK_Countries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -54,8 +35,8 @@ namespace Cls.DAL.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Birthday = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Birthday = table.Column<DateOnly>(type: "date", nullable: false),
+                    RegistrationDate = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,22 +70,126 @@ namespace Cls.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Schedules",
+                name: "Cities",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DoctorId = table.Column<int>(type: "int", nullable: false),
-                    DayOfWeek = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    WorkingHours = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    CountryId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Schedules", x => x.Id);
+                    table.PrimaryKey("PK_Cities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Schedules_Doctors_DoctorId",
-                        column: x => x.DoctorId,
-                        principalTable: "Doctors",
+                        name: "FK_Cities_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoleId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Doctors",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SpecializationId = table.Column<int>(type: "int", nullable: false),
+                    Examinationduration = table.Column<int>(type: "int", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Price = table.Column<double>(type: "float", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Doctors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Doctors_Specializations_SpecializationId",
+                        column: x => x.SpecializationId,
+                        principalTable: "Specializations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Clinics",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CityId = table.Column<int>(type: "int", nullable: true),
+                    CountryId = table.Column<int>(type: "int", nullable: true),
+                    ClinicName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clinics", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Clinics_Cities_CityId",
+                        column: x => x.CityId,
+                        principalTable: "Cities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Clinics_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Queries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PatientId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    QueryText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    QueryStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    QueryDate = table.Column<DateOnly>(type: "date", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Queries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Queries_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Queries_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -117,10 +202,11 @@ namespace Cls.DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PatientId = table.Column<int>(type: "int", nullable: false),
                     DoctorId = table.Column<int>(type: "int", nullable: false),
-                    PatientNameIN = table.Column<int>(type: "int", nullable: false),
-                    PatientNumberIN = table.Column<int>(type: "int", nullable: false),
-                    PatientEmailIN = table.Column<int>(type: "int", nullable: false),
-                    AppointmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PatientNameIN = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PatientNumberIN = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PatientEmailIN = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AppointmentDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    TimeSlot = table.Column<TimeSpan>(type: "time", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Teleconsultation = table.Column<bool>(type: "bit", nullable: true)
                 },
@@ -151,7 +237,7 @@ namespace Cls.DAL.Migrations
                     DoctorId = table.Column<int>(type: "int", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
                     ReviewText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ReviewDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    ReviewDate = table.Column<DateOnly>(type: "date", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -171,23 +257,55 @@ namespace Cls.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Nurses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    ClinicId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RoleId = table.Column<int>(type: "int", nullable: true)
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Price = table.Column<double>(type: "float", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Nurses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
+                        name: "FK_Nurses_Clinics_ClinicId",
+                        column: x => x.ClinicId,
+                        principalTable: "Clinics",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Schedules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DoctorId = table.Column<int>(type: "int", nullable: true),
+                    ClinicId = table.Column<int>(type: "int", nullable: true),
+                    Day = table.Column<DateOnly>(type: "date", nullable: true),
+                    AvailableFrom = table.Column<TimeSpan>(type: "time", nullable: true),
+                    AvailableTo = table.Column<TimeSpan>(type: "time", nullable: true),
+                    Status = table.Column<bool>(type: "bit", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Schedules_Clinics_ClinicId",
+                        column: x => x.ClinicId,
+                        principalTable: "Clinics",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Schedules_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
                         principalColumn: "Id");
                 });
 
@@ -220,35 +338,6 @@ namespace Cls.DAL.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Queries",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PatientId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    QueryText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    QueryStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    QueryDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Queries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Queries_Patients_PatientId",
-                        column: x => x.PatientId,
-                        principalTable: "Patients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Queries_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_DoctorId",
                 table: "Appointments",
@@ -268,6 +357,31 @@ namespace Cls.DAL.Migrations
                 name: "IX_Billings_PatientId",
                 table: "Billings",
                 column: "PatientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cities_CountryId",
+                table: "Cities",
+                column: "CountryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clinics_CityId",
+                table: "Clinics",
+                column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clinics_CountryId",
+                table: "Clinics",
+                column: "CountryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Doctors_SpecializationId",
+                table: "Doctors",
+                column: "SpecializationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Nurses_ClinicId",
+                table: "Nurses",
+                column: "ClinicId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Queries_PatientId",
@@ -290,6 +404,11 @@ namespace Cls.DAL.Migrations
                 column: "PatientId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Schedules_ClinicId",
+                table: "Schedules",
+                column: "ClinicId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Schedules_DoctorId",
                 table: "Schedules",
                 column: "DoctorId");
@@ -304,10 +423,10 @@ namespace Cls.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Address");
+                name: "Billings");
 
             migrationBuilder.DropTable(
-                name: "Billings");
+                name: "Nurses");
 
             migrationBuilder.DropTable(
                 name: "Queries");
@@ -319,13 +438,13 @@ namespace Cls.DAL.Migrations
                 name: "Schedules");
 
             migrationBuilder.DropTable(
-                name: "Specializations");
-
-            migrationBuilder.DropTable(
                 name: "Appointments");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Clinics");
 
             migrationBuilder.DropTable(
                 name: "Doctors");
@@ -335,6 +454,15 @@ namespace Cls.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "Cities");
+
+            migrationBuilder.DropTable(
+                name: "Specializations");
+
+            migrationBuilder.DropTable(
+                name: "Countries");
         }
     }
 }

@@ -37,18 +37,15 @@ namespace Cls.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PatientEmailIN")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
                     b.Property<string>("PatientNameIN")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PatientNumberIN")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
@@ -56,6 +53,9 @@ namespace Cls.DAL.Migrations
 
                     b.Property<bool?>("Teleconsultation")
                         .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("TimeSlot")
+                        .HasColumnType("time");
 
                     b.HasKey("Id");
 
@@ -104,6 +104,80 @@ namespace Cls.DAL.Migrations
                     b.ToTable("Billings");
                 });
 
+            modelBuilder.Entity("Models.City", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("Cities");
+                });
+
+            modelBuilder.Entity("Models.Clinic", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClinicName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("Clinics");
+                });
+
+            modelBuilder.Entity("Models.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Countries");
+                });
+
             modelBuilder.Entity("Models.Doctor", b =>
                 {
                     b.Property<int>("Id")
@@ -112,10 +186,16 @@ namespace Cls.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ClinicAddress")
+                    b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Examinationduration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -127,15 +207,20 @@ namespace Cls.DAL.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Specialty")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<double?>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<int>("SpecializationId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SpecializationId");
 
                     b.ToTable("Doctors");
                 });
 
-            modelBuilder.Entity("Models.DoctorSchedule", b =>
+            modelBuilder.Entity("Models.DoctorCLinic", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -143,23 +228,57 @@ namespace Cls.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("DayOfWeek")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ClinicId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DoctorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("WorkingHours")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClinicId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("DoctorCLinics");
+                });
+
+            modelBuilder.Entity("Models.DoctorSchedule", b =>
+                {
+                    b.Property<int?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"));
+
+                    b.Property<TimeSpan?>("AvailableFrom")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan?>("AvailableTo")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("ClinicId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("Status")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClinicId");
 
                     b.HasIndex("DoctorId");
 
                     b.ToTable("Schedules");
                 });
 
-            modelBuilder.Entity("Models.Location", b =>
+            modelBuilder.Entity("Models.Nurse", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,15 +286,35 @@ namespace Cls.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("City")
+                    b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("governorate")
+                    b.Property<int?>("ClinicId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Price")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Address");
+                    b.HasIndex("ClinicId");
+
+                    b.ToTable("Nurses");
                 });
 
             modelBuilder.Entity("Models.Patient", b =>
@@ -369,15 +508,84 @@ namespace Cls.DAL.Migrations
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("Models.DoctorSchedule", b =>
+            modelBuilder.Entity("Models.City", b =>
                 {
+                    b.HasOne("Models.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("Models.Clinic", b =>
+                {
+                    b.HasOne("Models.City", "City")
+                        .WithMany()
+                        .HasForeignKey("CityId");
+
+                    b.HasOne("Models.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId");
+
+                    b.Navigation("City");
+
+                    b.Navigation("Country");
+                });
+
+            modelBuilder.Entity("Models.Doctor", b =>
+                {
+                    b.HasOne("Models.Specialization", "specialization")
+                        .WithMany()
+                        .HasForeignKey("SpecializationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("specialization");
+                });
+
+            modelBuilder.Entity("Models.DoctorCLinic", b =>
+                {
+                    b.HasOne("Models.Clinic", "Clinic")
+                        .WithMany()
+                        .HasForeignKey("ClinicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Models.Doctor", "Doctor")
-                        .WithMany("Schedules")
+                        .WithMany()
                         .HasForeignKey("DoctorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Clinic");
+
                     b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("Models.DoctorSchedule", b =>
+                {
+                    b.HasOne("Models.Clinic", "Clinic")
+                        .WithMany()
+                        .HasForeignKey("ClinicId");
+
+                    b.HasOne("Models.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId");
+
+                    b.Navigation("Clinic");
+
+                    b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("Models.Nurse", b =>
+                {
+                    b.HasOne("Models.Clinic", "clinic")
+                        .WithMany()
+                        .HasForeignKey("ClinicId");
+
+                    b.Navigation("clinic");
                 });
 
             modelBuilder.Entity("Models.Query", b =>
@@ -425,11 +633,6 @@ namespace Cls.DAL.Migrations
                         .HasForeignKey("RoleId");
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("Models.Doctor", b =>
-                {
-                    b.Navigation("Schedules");
                 });
 #pragma warning restore 612, 618
         }

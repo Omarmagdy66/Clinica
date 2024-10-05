@@ -6,9 +6,7 @@ namespace Models;
 public partial class Billing
 {
     public int Id { get; set; }
-
     public int? PatientId { get; set; }
-
     public int? AppointmentId { get; set; }
     [DataType("decimal(8,2)")]
     public double? TotalAmount { get; set; }

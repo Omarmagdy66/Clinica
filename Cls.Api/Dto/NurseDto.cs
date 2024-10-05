@@ -2,10 +2,9 @@
 
 namespace Dto;
 
-public class DoctorDto
+public class NurseDto
 {
-    public int SpecializationId { get; set; }
-    public int? Examinationduration { get; set; }
+    public int? ClinicId { get; set; }
     public string? Name { get; set; }
     public string? Email { get; set; }
     public string? Password { get; set; }

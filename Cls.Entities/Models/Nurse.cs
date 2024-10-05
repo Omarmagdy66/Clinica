@@ -6,7 +6,7 @@ namespace Models;
 public class Nurse
 {
     public int Id { get; set; }
-    public string? ClinicId { get; set; }
+    public int? ClinicId { get; set; }
     public string? Name { get; set; }
     public string? Email { get; set; }
     public string? Password { get; set; }

@@ -1,7 +1,6 @@
-﻿namespace Cls.Api.Dto
+﻿namespace Dto;
+
+public class RoleDto
 {
-    public class RoleDto
-    {
-        public string? RoleName { get; set; }
-    }
+    public string? RoleName { get; set; }
 }

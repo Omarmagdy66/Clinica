@@ -6,8 +6,8 @@ namespace Models;
 public class Doctor
 {
     public int Id { get; set; }
-    public string? SpecializationId { get; set; }
-    public string? ClinicId { get; set; }
+    public int SpecializationId { get; set; }
+    public int? Examinationduration { get; set; }
     public string? Name { get; set; }
     public string? Email { get; set; }
     public string? Password { get; set; }
@@ -18,7 +18,6 @@ public class Doctor
     public double? Price { get; set; }
 
     public Specialization? specialization { get; set; }
-    public Clinic? clinic { get; set; }
 
 
 }
