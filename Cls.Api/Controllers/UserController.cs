@@ -1,7 +1,13 @@
-﻿using Dto;
+﻿using Cls.Api.Dto;
+using Dto;
 using Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Models;
+using Services;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Controllers;
 
@@ -9,8 +15,13 @@ namespace Controllers;
 [ApiController]
 public class UserController : APIBaseController
 {
-    public UserController(IUnitOfWork unitOfWork) : base(unitOfWork)
+    private readonly IConfiguration configuration;
+    private readonly JwtService jwt;
+
+    public UserController(IUnitOfWork unitOfWork,IConfiguration configuration) : base(unitOfWork)
     {
+        this.configuration = configuration;
+        this.jwt = new JwtService(configuration);
     }
     [HttpGet("GetAll")]
     public IActionResult GetAll()
@@ -26,18 +37,22 @@ public class UserController : APIBaseController
         if(User == null) return BadRequest();
         return Ok();
     }
-    [HttpPost("Create")]
-    public IActionResult Create(UserDto dto)
+    [HttpPost("register")]
+    public async Task<IActionResult> CreateAsync(UserDto dto)
     {
+        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.Name);
+        if (user1 != null)
+            return BadRequest("Username already Exist!");
         User user = new User()
         {
-             Name = dto.Name,
-             Email = dto.Email,
-             Password = dto.Password,
-             RoleId = dto.RoleId,
+            Name = dto.Name,
+            Email = dto.Email,
+            Password = dto.Password,
+            RoleId = dto.RoleId,
         };
         _unitOfWork.Users.Add(user);
-        return Ok();
+        _unitOfWork.Save();
+        return Ok("Created!");
     }
 
     [HttpPut("Update")]
@@ -56,6 +71,25 @@ public class UserController : APIBaseController
         if(user == null) return BadRequest();
         _unitOfWork.Users.Delete(user);
         return Ok();
+    }
+    [HttpPost("Login")]
+    public async Task<IActionResult> LoginAndTokenAsync(LoginDto loginDto)
+    {
+        if (ModelState.IsValid)
+        {
+            User user = await _unitOfWork.Users.GetByNameAsync(loginDto.Name);
+            if (user == null) return BadRequest("Username Or Password is incorrect");
+            if (loginDto.Password != user.Password) return BadRequest("Username Or Password is incorrect");
+            var role = _unitOfWork.Roles.GetById((int)user.RoleId);
+
+            return Ok(new
+            {
+                token = jwt.GenerateJSONWebToken(user, role.RoleName),
+                expiration = DateTime.UtcNow.AddHours(1)
+            });
+
+        }
+        return BadRequest(ModelState);
     }
 
 }
