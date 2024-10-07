@@ -43,11 +43,12 @@ public class UserController : APIBaseController
         var user1 = await _unitOfWork.Users.GetByNameAsync(dto.Name);
         if (user1 != null)
             return BadRequest("Username already Exist!");
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
             Name = dto.Name,
             Email = dto.Email,
-            Password = dto.Password,
+            Password =hashedPassword,
             RoleId = dto.RoleId,
         };
         _unitOfWork.Users.Add(user);
@@ -79,7 +80,7 @@ public class UserController : APIBaseController
         {
             User user = await _unitOfWork.Users.GetByNameAsync(loginDto.Name);
             if (user == null) return BadRequest("Username Or Password is incorrect");
-            if (loginDto.Password != user.Password) return BadRequest("Username Or Password is incorrect");
+            if (!(BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))) return BadRequest("Username Or Password is incorrect");
             var role = _unitOfWork.Roles.GetById((int)user.RoleId);
 
             return Ok(new
