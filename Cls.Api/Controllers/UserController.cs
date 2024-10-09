@@ -37,24 +37,96 @@ public class UserController : APIBaseController
         if(User == null) return BadRequest();
         return Ok();
     }
-    [HttpPost("register")]
-    public async Task<IActionResult> CreateAsync(UserDto dto)
+    [HttpPost("PatientRegister")]
+    public async Task<IActionResult> CreateAsync(PatientRegesterDto dto)
     {
-        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.Name);
+        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.UserName);
         if (user1 != null)
             return BadRequest("Username already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
-            Name = dto.Name,
+            Name = dto.UserName,
             Email = dto.Email,
             Password =hashedPassword,
-            RoleId = dto.RoleId,
+            RoleId = 2
         };
         _unitOfWork.Users.Add(user);
+        var P = new Patient()
+        {
+            Name = dto.Name,
+            Gender = dto.Gender,
+            PhoneNumber = dto.PhoneNumber,
+            Birthday = dto.Birthday,
+            //RegistrationDate = DateTime.Now
+             
+        };
+        _unitOfWork.Patients.Add(P);
         _unitOfWork.Save();
-        return Ok("Created!");
+        return Ok("Created");
     }
+    
+    [HttpPost("DoctorRegister")]
+    public async Task<IActionResult> CreateDoctorAsync(DoctorRegisterDto dto)
+    {
+        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.UserName);
+        if (user1 != null)
+            return BadRequest("Username already Exist!");
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+        User user = new User()
+        {
+            Name = dto.UserName,
+            Email = dto.Email,
+            Password =hashedPassword,
+            RoleId = 3
+        };
+        _unitOfWork.Users.Add(user);
+        var d = new Doctor()
+        {
+            Name = dto.Name,
+            SpecializationId=dto.SpecializationId,
+            PhoneNumber = dto.PhoneNumber,
+            Price= dto.Price,
+            Bio=dto.Bio,
+            Examinationduration=dto.Examinationduration,
+            Image= dto.Image
+            //RegistrationDate = DateTime.Now
+        };
+        _unitOfWork.Doctors.Add(d);
+        _unitOfWork.Save();
+        return Ok("Created");
+    }
+    [HttpPost("NurseRegister")]
+    public async Task<IActionResult> CreateNurseAsync(DoctorRegisterDto dto)
+    {
+        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.UserName);
+        if (user1 != null)
+            return BadRequest("Username already Exist!");
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+        User user = new User()
+        {
+            Name = dto.UserName,
+            Email = dto.Email,
+            Password = hashedPassword,
+            RoleId = 4
+        };
+        _unitOfWork.Users.Add(user);
+        var d = new Doctor()
+        {
+            Name = dto.Name,
+            SpecializationId = dto.SpecializationId,
+            PhoneNumber = dto.PhoneNumber,
+            Price = dto.Price,
+            Bio = dto.Bio,
+            Examinationduration = dto.Examinationduration,
+            Image = dto.Image,
+            //RegistrationDate = DateTime.Now
+        };
+        _unitOfWork.Doctors.Add(d);
+        _unitOfWork.Save();
+        return Ok("Created");
+    }
+
 
     [HttpPut("Update")]
     public IActionResult Update(int id)
@@ -78,9 +150,20 @@ public class UserController : APIBaseController
     {
         if (ModelState.IsValid)
         {
-            User user = await _unitOfWork.Users.GetByNameAsync(loginDto.Name);
-            if (user == null) return BadRequest("Username Or Password is incorrect");
-            if (!(BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))) return BadRequest("Username Or Password is incorrect");
+            // Query by either username or email
+            User user = await _unitOfWork.Users.FindAsync( u => u.Name == loginDto.Name );
+            if (user == null)
+            {
+                user= await _unitOfWork.Users.FindAsync(u=>u.Email == loginDto.Name);
+            }
+
+            if (user == null) return BadRequest("Username or Password is incorrect");
+            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginDto.Password);
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password);
+
+
+            if (!isPasswordValid) return BadRequest("Username or Password is incorrect");
+
             var role = _unitOfWork.Roles.GetById((int)user.RoleId);
 
             return Ok(new
@@ -88,9 +171,9 @@ public class UserController : APIBaseController
                 token = jwt.GenerateJSONWebToken(user, role.RoleName),
                 expiration = DateTime.UtcNow.AddHours(1)
             });
-
         }
         return BadRequest(ModelState);
     }
+
 
 }
