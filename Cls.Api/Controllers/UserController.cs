@@ -101,34 +101,34 @@ public class UserController : APIBaseController
         return Ok("Created");
     }
     [HttpPost("NurseRegister")]
-    public async Task<IActionResult> CreateNurseAsync(DoctorRegisterDto dto)
+    public async Task<IActionResult> CreateNurseAsync(NurseDto dto)
     {
-        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.UserName);
+        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.Name);
         if (user1 != null)
             return BadRequest("Username already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
-            Name = dto.UserName,
+            Name = dto.Name,
             Email = dto.Email,
             Password = hashedPassword,
             RoleId = 4
         };
         _unitOfWork.Users.Add(user);
-        var d = new Doctor()
+        var d = new Nurse()
         {
             Name = dto.Name,
             Email = dto.Email,
             Password = hashedPassword,
-            SpecializationId = dto.SpecializationId,
+            ClinicId=dto.ClinicId,  
             PhoneNumber = dto.PhoneNumber,
             Price = dto.Price,
             Bio = dto.Bio,
-            Examinationduration = dto.Examinationduration,
+           
             Image = dto.Image,
             //RegistrationDate = DateTime.Now
         };
-        _unitOfWork.Doctors.Add(d);
+        _unitOfWork.Nurses.Add(d);
         _unitOfWork.Save();
         return Ok("Created");
     }
