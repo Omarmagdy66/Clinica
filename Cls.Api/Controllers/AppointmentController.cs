@@ -89,4 +89,63 @@ public class AppointmentController : APIBaseController
         _unitOfWork.Save();
         return Ok("Deleted!");
     }
+    [HttpGet("byDoctor/{doctorId}")]
+    public async Task<IActionResult> GetAppointmentsByDoctorId(int doctorId)
+    {
+        var appointments = await _unitOfWork.Appointments.FindAllAsync(a => a.DoctorId == doctorId);
+        if (appointments == null || !appointments.Any())
+        {
+            return NotFound($"No appointments found for Doctor with Id {doctorId}");
+        }
+        return Ok(appointments);
+    }
+    [HttpGet("byPatient/{patientId}")]
+    public async Task<IActionResult> GetAppointmentsByPatientId(int patientId)
+    {
+        var appointments = await _unitOfWork.Appointments.FindAllAsync(a => a.PatientId == patientId);
+        if (appointments == null || !appointments.Any())
+        {
+            return NotFound($"No appointments found for Patient with Id {patientId}");
+        }
+        return Ok(appointments);
+    }
+    [HttpGet("byDateRange")]
+    public async Task<IActionResult> GetAppointmentsByDateRange(DateOnly startDate, DateOnly endDate)
+    {
+        var appointments = await _unitOfWork.Appointments.FindAllAsync(a => a.AppointmentDate >= startDate && a.AppointmentDate <= endDate);
+        if (appointments == null || !appointments.Any())
+        {
+            return NotFound($"No appointments found between {startDate} and {endDate}");
+        }
+        return Ok(appointments);
+    }
+    [HttpGet("status/{id}")]
+    public async Task<IActionResult> GetAppointmentStatus(int id)
+    {
+        var appointment = await _unitOfWork.Appointments.GetByIdAsync(id);
+        if (appointment == null)
+        {
+            return NotFound("Appointment not found.");
+        }
+        return Ok(appointment.Status);
+    }
+    [HttpGet("history/patient/{patientId}")]
+    public async Task<IActionResult> GetAppointmentHistoryByPatient(int patientId)
+    {
+        var history = await _unitOfWork.Appointments.FindAllAsync(a => a.PatientId == patientId && (a.Status == "completed" || a.Status == "cancelled"));
+        return Ok(history);
+    }
+
+    [HttpGet("history/doctor/{doctorId}")]
+    public async Task<IActionResult> GetAppointmentHistoryByDoctor(int doctorId)
+    {
+        var history = await _unitOfWork.Appointments.FindAllAsync(a => a.DoctorId == doctorId && (a.Status == "completed" || a.Status == "cancelled"));
+        return Ok(history);
+    }
+
+
+
+
+
+
 }
