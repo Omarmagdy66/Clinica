@@ -23,19 +23,19 @@ public class UserController : APIBaseController
         this.configuration = configuration;
         this.jwt = new JwtService(configuration);
     }
-    [HttpGet("GetAll")]
-    public IActionResult GetAll()
+    [HttpGet("GetAllUsers")]
+    public async Task<IActionResult> GetAll()
     {
-        _unitOfWork.Users.GetAll();
-        return Ok();
+        var users = await _unitOfWork.Users.GetAllAsync();
+        return Ok(users);
 
     }
     [HttpGet("GetById")]
     public IActionResult GetAllPatiant(int id)
     {
        var User = _unitOfWork.Users.GetById(id);
-        if(User == null) return BadRequest();
-        return Ok();
+        if(User == null) return BadRequest("Invalid Id");
+        return Ok(User);
     }
     [HttpPost("PatientRegister")]
     public async Task<IActionResult> CreateAsync(PatientRegesterDto dto)
@@ -55,6 +55,8 @@ public class UserController : APIBaseController
         var P = new Patient()
         {
             Name = dto.Name,
+            Email = dto.Email,
+            Password = hashedPassword,
             Gender = dto.Gender,
             PhoneNumber = dto.PhoneNumber,
             Birthday = dto.Birthday,
@@ -84,7 +86,9 @@ public class UserController : APIBaseController
         var d = new Doctor()
         {
             Name = dto.Name,
-            SpecializationId=dto.SpecializationId,
+            Email = dto.Email,
+            Password = hashedPassword,
+            SpecializationId =dto.SpecializationId,
             PhoneNumber = dto.PhoneNumber,
             Price= dto.Price,
             Bio=dto.Bio,
@@ -114,6 +118,8 @@ public class UserController : APIBaseController
         var d = new Doctor()
         {
             Name = dto.Name,
+            Email = dto.Email,
+            Password = hashedPassword,
             SpecializationId = dto.SpecializationId,
             PhoneNumber = dto.PhoneNumber,
             Price = dto.Price,
@@ -133,8 +139,9 @@ public class UserController : APIBaseController
     {
         var user = _unitOfWork.Users.GetById(id);
         if(user == null) return BadRequest();
-        _unitOfWork.Users.Update(user);
-        return Ok();
+         _unitOfWork.Users.Update(user);
+        _unitOfWork.Save();
+        return Ok("Updated");
     }
 
     [HttpDelete("Delete")]
@@ -143,7 +150,8 @@ public class UserController : APIBaseController
         var user = _unitOfWork.Users.GetById(id);
         if(user == null) return BadRequest();
         _unitOfWork.Users.Delete(user);
-        return Ok();
+        _unitOfWork.Save();
+        return Ok("Deleted");
     }
     [HttpPost("Login")]
     public async Task<IActionResult> LoginAndTokenAsync(LoginDto loginDto)
