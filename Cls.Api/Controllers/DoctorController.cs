@@ -44,7 +44,17 @@ public class DoctorController : APIBaseController
                 PhoneNumber = doctordto.PhoneNumber,
                 Price = doctordto.Price,
                 SpecializationId = doctordto.SpecializationId,
+                DoctorCLinics = new List<DoctorCLinic>()
             };
+
+            
+            var doctorClinic = new DoctorCLinic()
+            {
+                ClinicId = doctordto.ClinicId,
+                Doctor = doctor 
+            };
+
+            doctor.DoctorCLinics.Add(doctorClinic);
             await _unitOfWork.Doctors.AddAsync(doctor);
             _unitOfWork.Save();
             return Ok("Created!");
