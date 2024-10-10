@@ -29,5 +29,26 @@ public partial class clinicdbContext : DbContext
     public virtual DbSet<Country> Countries { get; set; }
     public virtual DbSet<City> Cities { get; set; }
     public virtual DbSet<DoctorCLinic> DoctorCLinics { get; set; }
+    public virtual DbSet<Admin> Admins { get; set; }
+    public virtual DbSet<adminRequest> AdminRequests { get; set; }
+    public virtual DbSet<NurseAdminRequest> NusreAdminRequests { get; set; }
+    public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<NurseNotification> NurseNotifications { get; set; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DoctorCLinic>()
+            .HasKey(dc => new { dc.DoctorId, dc.ClinicId });
+
+        modelBuilder.Entity<DoctorCLinic>()
+            .HasOne(dc => dc.Doctor)
+            .WithMany(d => d.DoctorCLinics)
+            .HasForeignKey(dc => dc.DoctorId);
+
+        modelBuilder.Entity<DoctorCLinic>()
+            .HasOne(dc => dc.Clinic)
+            .WithMany(c => c.DoctorCLinics)
+            .HasForeignKey(dc => dc.ClinicId);
+    }
+
 
 }

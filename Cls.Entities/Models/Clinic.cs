@@ -12,4 +12,5 @@ public class Clinic
     public string? Image { get; set; }
     public Country? Country { get; set; }
     public City? City { get; set; }
+    public virtual ICollection<DoctorCLinic>? DoctorCLinics { get; set; }
 }

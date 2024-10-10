@@ -24,6 +24,12 @@ namespace DAL
         {
             return _context.Set<T>().ToList();
         }
+        public async Task<T> GetByCompositeAsync(params object[] keys)
+
+        {
+            return await _context.Set<T>().FindAsync(keys);
+        }
+
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _context.Set<T>().ToListAsync();
@@ -268,6 +274,8 @@ namespace DAL
         {
             return _context.Set<T>().OrderByDescending(orderBy).FirstOrDefault(criteria);
         }
+
+       
     }
 }
 

@@ -2,7 +2,7 @@
 using Data;
 using Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Repository;
+using DAL;
 
 namespace Cls.Api
 {
