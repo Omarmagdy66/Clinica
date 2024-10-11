@@ -83,4 +83,73 @@ public class DoctorScheduleController : APIBaseController
         _unitOfWork.Save();
         return Ok("Deleted!");
     }
+    [HttpGet("ByDoctor/{doctorId}")]
+    public async Task<IActionResult> GetSchedulesByDoctorId(int doctorId)
+    {
+        var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.DoctorId == doctorId);
+
+        if (schedules == null || !schedules.Any())  // Check for null or empty list
+        {
+            return NotFound($"No schedules found for Doctor with Id {doctorId}");
+        }
+
+        return Ok(schedules);  // Return the list of schedules
+    }
+
+
+    [HttpGet("ByClinic/{clinicId}")]
+    public async Task<IActionResult> GetSchedulesByClinicId(int clinicId)
+    {
+        var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.ClinicId == clinicId);
+        if (schedules == null || !schedules.Any())
+        {
+            return NotFound($"No schedules found for Clinic with Id {clinicId}");
+        }
+        return Ok(schedules);
+    }
+
+    [HttpGet("ByDate/{date}")]
+    public async Task<IActionResult> GetSchedulesByDate(DateOnly date)
+    {
+        var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.Day == date);
+        if (schedules == null || !schedules.Any())
+        {
+            return NotFound($"No schedules found on {date}");
+        }
+        return Ok(schedules);
+    }
+
+    [HttpGet("CheckAvailability")]
+    public async Task<IActionResult> CheckAvailability(int doctorId, int clinicId, DateOnly date, TimeSpan time)
+    {
+        var schedule = await _unitOfWork.Schedules.FindAsync(s =>
+            s.DoctorId == doctorId &&
+            s.ClinicId == clinicId &&
+            s.Day == date &&
+            s.AvailableFrom <= time &&
+            s.AvailableTo >= time &&
+            s.Status == true);
+
+        if (schedule == null)
+        {
+            return NotFound($"Doctor is not available at the specified date and time.");
+        }
+        return Ok("Doctor is available");
+    }
+    [HttpGet("FilterByStatus/{status}")]
+    public async Task<IActionResult> GetSchedulesByStatus(bool status)
+    {
+        var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.Status == status);
+        if (schedules == null || !schedules.Any())
+        {
+            return NotFound($"No schedules found with status: {(status ? "Available" : "Booked")}");
+        }
+        return Ok(schedules);
+    }
+
+
+
+
+
+
 }
