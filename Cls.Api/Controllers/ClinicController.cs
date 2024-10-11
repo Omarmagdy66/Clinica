@@ -13,13 +13,13 @@ public class ClinicController : APIBaseController
     {
     }
     [HttpGet]
-    public async Task<IActionResult> GetAllLocations()
+    public async Task<IActionResult> GetAllClinics()
     {
         //var Clinics = await _unitOfWork.Clinics.GetAllAsync();
         return Ok(await _unitOfWork.Clinics.GetAllAsync());
     }
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetLocationById(int id)
+    public async Task<IActionResult> GetClinicById(int id)
     {
         var clinic = await _unitOfWork.Clinics.GetByIdAsync(id);
         if (clinic == null)
@@ -27,6 +27,50 @@ public class ClinicController : APIBaseController
             return BadRequest("Invalid Id");
         }
         return Ok(clinic);
+    }
+    [HttpGet("GetClinicByCityId")]
+    public async Task<IActionResult> GetClinicByCityId(int CityId)
+    {
+        var clinics = await _unitOfWork.Clinics.GetAllAsync();
+        var clinic = clinics.FirstOrDefault(x => x.CityId == CityId);
+        if (clinic == null)
+        {
+            return BadRequest($"there isn't clinic in the city with id {CityId}");
+        }
+        return Ok(clinic);
+    }
+    [HttpGet("GetClinicByCountryId")]
+    public async Task<IActionResult> GetClinicByCountryId(int CountryId)
+    {
+        var clinics = await _unitOfWork.Clinics.GetAllAsync();
+        var clinic = clinics.FirstOrDefault(x => x.CountryId == CountryId);
+        if (clinic == null)
+        {
+            return BadRequest($"there isn't clinic in the city with id {CountryId}");
+        }
+        return Ok(clinic);
+    }
+    [HttpGet("GetClinicBySpecialization")]
+    public async Task<IActionResult> GetClinicBySpecialization(int specializationId)
+    {
+        var clinics = await _unitOfWork.Clinics.FindAllAsync(clinic => clinic.DoctorCLinics.Any(dc => dc.Doctor.SpecializationId == specializationId));
+
+        if (!clinics.Any())
+        {
+            return NotFound("No clinics found offering this specialization.");
+        }
+        return Ok(clinics);
+    }
+    [HttpGet("GetClinicByDoctor")]
+    public async Task<IActionResult> GetClinicByDoctor(int doctorId)
+    {
+        var clinics = await _unitOfWork.Clinics.FindAllAsync(clinic => clinic.DoctorCLinics.Any(doctor => doctor.DoctorId == doctorId));
+
+        if (!clinics.Any())
+        {
+            return NotFound("No clinics found that have the provided doctor");
+        }
+        return Ok(clinics);
     }
     [HttpPost]
     public async Task<IActionResult> AddLocation(ClinicDto clinicDto)

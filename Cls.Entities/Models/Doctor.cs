@@ -20,5 +20,6 @@ public class Doctor
     public Specialization? specialization { get; set; }
     public virtual ICollection<DoctorCLinic>? DoctorCLinics { get; set; }
 
+    public ICollection<DoctorCLinic>? DoctorCLinics { get; set; }
 
 }
