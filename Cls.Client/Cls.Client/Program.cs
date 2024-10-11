@@ -32,7 +32,7 @@ namespace Cls.Client
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Employee}/{action=index}/{id?}");
+                pattern: "{controller=Home}/{action=index}/{id?}");
 
             app.Run();
         }

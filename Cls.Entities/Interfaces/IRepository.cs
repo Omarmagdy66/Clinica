@@ -12,6 +12,7 @@ namespace Interfaces
         T GetById(int id);
         Task<T> GetByIdAsync(int id);
         Task<T> GetByCompositeAsync(params object[] keys);
+        Task<T> GetByNameAsync(string name);
         IEnumerable<T> GetAll();
         Task<IEnumerable<T>> GetAllAsync();
         public List<string> GetDistinct(Expression<Func<T, string>> col);

@@ -1,5 +1,6 @@
 ﻿using Dto;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 
@@ -12,8 +13,10 @@ public class PatientController : APIBaseController
     public PatientController(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
-    [HttpGet]
-    public async Task<IActionResult> GetAllPatients()
+
+    [HttpGet("GetAll")]
+    [Authorize]
+    public async Task<IActionResult> GetAll()
     {
         //var Patients = await _unitOfWork.Patients.GetAllAsync();
         return Ok(await _unitOfWork.Patients.GetAllAsync());

@@ -34,6 +34,11 @@ namespace DAL
         {
             return await _context.Set<T>().ToListAsync();
         }
+        public async Task<T> GetByNameAsync(string name)
+        {
+            return await _context.Set<T>().FirstOrDefaultAsync(e => EF.Property<string>(e, "Name") == name);
+        }
+
 
         public T GetById(int id)
         {
