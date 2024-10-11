@@ -42,7 +42,7 @@ namespace DAL
         public List<string> GetDistinct(Expression<Func<T, string>> col)
         {
             var distinctValues = _context.Set<T>()
-                                           .Select(col)
+                                           .Select(col.Compile())
                                            .Distinct()
                                            .ToList();
 
