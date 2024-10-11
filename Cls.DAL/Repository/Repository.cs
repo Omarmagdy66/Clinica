@@ -24,10 +24,21 @@ namespace DAL
         {
             return _context.Set<T>().ToList();
         }
+        public async Task<T> GetByCompositeAsync(params object[] keys)
+
+        {
+            return await _context.Set<T>().FindAsync(keys);
+        }
+
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _context.Set<T>().ToListAsync();
         }
+        public async Task<T> GetByNameAsync(string name)
+        {
+            return await _context.Set<T>().FirstOrDefaultAsync(e => EF.Property<string>(e, "Name") == name);
+        }
+
 
         public T GetById(int id)
         {
@@ -42,7 +53,7 @@ namespace DAL
         public List<string> GetDistinct(Expression<Func<T, string>> col)
         {
             var distinctValues = _context.Set<T>()
-                                           .Select(col)
+                                           .Select(col.Compile())
                                            .Distinct()
                                            .ToList();
 
@@ -268,6 +279,8 @@ namespace DAL
         {
             return _context.Set<T>().OrderByDescending(orderBy).FirstOrDefault(criteria);
         }
+
+       
     }
 }
 
