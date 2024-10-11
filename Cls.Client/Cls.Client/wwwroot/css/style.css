@@ -1,0 +1,220 @@
+﻿/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    background-color: #e0f7fa; /* Light blue background */
+    color: #333;
+}
+
+/* Navigation Bar */
+header {
+    background-color: #0288d1;
+    padding: 15px 0;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between; /* Puts logo on left, nav-links on right */
+    align-items: center;
+    padding: 0 10%;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+}
+
+    .nav-links li a {
+        text-decoration: none;
+        color: #fff;
+        font-weight: bold;
+        padding: 10px;
+        transition: transform 0.4s ease, background-color 0.3s ease; /* Added for explosion effect */
+    }
+
+        .nav-links li a:hover {
+            background-color: #01579b;
+            border-radius: 5px;
+            transform: scale(1.2); /* Makes links "explode" by growing in size */
+        }
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #4caf50, #0288d1);
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+    }
+
+    .hero .btn {
+        background-color: #ff5722;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+        .hero .btn:hover {
+            background-color: #e64a19;
+        }
+
+/* Services Section */
+.services {
+    padding: 50px 0;
+    background-color: #fff;
+    text-align: center;
+}
+
+    .services h2 {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+
+.service-cards {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.card {
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    width: 30%;
+}
+
+    .card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: #0288d1;
+    }
+
+    .card p {
+        font-size: 1rem;
+        color: #666;
+    }
+
+/* Footer Section */
+footer {
+    background-color: #0288d1;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 20px;
+}
+
+/* Login Section */
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh; /* Takes 80% of the viewport height */
+    background: linear-gradient(135deg, #4caf50, #0288d1); /* Adds a gradient background */
+}
+
+.login-box {
+    background-color: #fff;
+    padding: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    width: 400px;
+    text-align: center; /* Center content inside the box */
+    border: 2px solid #ff5722; /* Adds a colorful border */
+}
+
+    .login-box h2 {
+        font-size: 2rem;
+        margin-bottom: 30px;
+        color: #0288d1; /* Consistent with your site color scheme */
+    }
+
+    .login-box label {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .login-box input[type="text"],
+    .login-box input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0 20px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+        background-color: #e0f7fa; /* Light blue background for input fields */
+    }
+
+    .login-box input[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        background-color: #ff5722; /* Bright submit button */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+        .login-box input[type="submit"]:hover {
+            background-color: #e64a19;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+    .login-box .forgot-password {
+        text-align: right;
+        font-size: 0.9rem;
+        color: #0288d1;
+        text-decoration: none;
+        display: block;
+        margin-top: 10px;
+    }
+
+        .login-box .forgot-password:hover {
+            color: #01579b;
+        }
+
+    .login-box .register {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+
+        .login-box .register a {
+            color: #4caf50; /* Green link for register */
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+            .login-box .register a:hover {
+                color: #388e3c; /* Darker green on hover */
+            }

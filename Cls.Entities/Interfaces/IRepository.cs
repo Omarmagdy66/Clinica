@@ -8,6 +8,7 @@ namespace Interfaces;
 public interface IRepository<T> where T : class
 {
     T GetById(int id);
+    public Task<T> GetByNameAsync(string name);
     Task<T> GetByIdAsync(int id);
     IEnumerable<T> GetAll();
     Task<IEnumerable<T>> GetAllAsync();
