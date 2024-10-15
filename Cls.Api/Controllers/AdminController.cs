@@ -2,6 +2,7 @@
 using Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Controllers
 {
@@ -13,7 +14,10 @@ namespace Controllers
         {
 
         }
+
+
         [HttpPost("AdminResponseDoctor")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> AdminResponseDoctor(int id, int flag)
         {
             var request = await _unitOfWork.AdminRequests.GetByIdAsync(id);
@@ -61,6 +65,7 @@ namespace Controllers
             }
         }
         [HttpPost("AdminResponseNurse")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> AdminResponseNurse(int id, int flag)
         {
             var request = await _unitOfWork.NurseAdminRequests.GetByIdAsync(id);

@@ -1,5 +1,6 @@
 ﻿using Dto;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 
@@ -13,6 +14,7 @@ public class DoctorScheduleController : APIBaseController
     {
     }
     [HttpGet]
+    [Authorize(Roles = "Doctor")]
     public async Task<IActionResult> GetAllSchedules()
     {
         //var Schedules = await _unitOfWork.Schedules.GetAllAsync();
@@ -109,7 +111,7 @@ public class DoctorScheduleController : APIBaseController
     }
 
     [HttpGet("ByDate/{date}")]
-    public async Task<IActionResult> GetSchedulesByDate(DateOnly date)
+    public async Task<IActionResult> GetSchedulesByDate(DateTime date)
     {
         var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.Day == date);
         if (schedules == null || !schedules.Any())
@@ -120,7 +122,7 @@ public class DoctorScheduleController : APIBaseController
     }
 
     [HttpGet("CheckAvailability")]
-    public async Task<IActionResult> CheckAvailability(int doctorId, int clinicId, DateOnly date, TimeSpan time)
+    public async Task<IActionResult> CheckAvailability(int doctorId, int clinicId, DateTime date, TimeOnly time)
     {
         var schedule = await _unitOfWork.Schedules.FindAsync(s =>
             s.DoctorId == doctorId &&

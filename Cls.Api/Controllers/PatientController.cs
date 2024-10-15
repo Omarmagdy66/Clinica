@@ -4,7 +4,6 @@ using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
-using Repository;
 using System.Linq.Expressions;
 
 namespace Controllers;
@@ -21,7 +20,6 @@ public class PatientController : APIBaseController
     [Authorize]
     public async Task<IActionResult> GetAll()
     {
-        //var Patients = await _unitOfWork.Patients.GetAllAsync();
         return Ok(await _unitOfWork.Patients.GetAllAsync());
     }
     [HttpGet("{id}")]
@@ -43,11 +41,11 @@ public class PatientController : APIBaseController
             {
                 Name = patientdto.Name,
                 Email = patientdto.Email,
-                Birthday = DateOnly.Parse(patientdto.Birthday),
+                Birthday = patientdto.Birthday,
                 Gender = patientdto.Gender,
                 Password = patientdto.Password,
                 PhoneNumber = patientdto.PhoneNumber,
-                RegistrationDate = DateOnly.Parse(patientdto.RegistrationDate)
+                RegistrationDate = patientdto.RegistrationDate
             };
             await _unitOfWork.Patients.AddAsync(patient);
             _unitOfWork.Save();
@@ -67,11 +65,11 @@ public class PatientController : APIBaseController
         {
             patient.Name = patientdto.Name;
             patient.Email = patientdto.Email;
-            patient.Birthday = DateOnly.Parse(patientdto.Birthday);
+            patient.Birthday = patientdto.Birthday;
             patient.Gender = patientdto.Gender;
             patient.Password = patientdto.Password;
             patient.PhoneNumber = patientdto.PhoneNumber;
-            patient.RegistrationDate = DateOnly.Parse(patientdto.RegistrationDate);
+            patient.RegistrationDate = patientdto.RegistrationDate;
             _unitOfWork.Patients.Update(patient);
             _unitOfWork.Save();
             return Ok("Updated!");

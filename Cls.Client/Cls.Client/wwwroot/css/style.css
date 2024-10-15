@@ -218,3 +218,31 @@ footer {
             .login-box .register a:hover {
                 color: #388e3c; /* Darker green on hover */
             }
+
+.search-container {
+    margin: 50px auto;
+    width: 60%;
+    text-align: center;
+}
+
+.search-bar select, .search-bar input, .search-bar button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 1em;
+}
+
+button {
+    background-color: #2A9D8F;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+    button:hover {
+        background-color: #21867A;
+    }
+
+.search-results {
+    margin-top: 20px;
+    text-align: left;
+}

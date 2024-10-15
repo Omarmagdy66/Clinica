@@ -8,6 +8,6 @@ namespace Dto;
     public string? Password { get; set; }
     public string? PhoneNumber { get; set; }
     public string? Gender { get; set; }
-    public String Birthday { get; set; }
-    public string RegistrationDate { get; set; }
+    public DateTime? Birthday { get; set; }
+    public DateTime? RegistrationDate { get; set; }= DateTime.Now.Date;
 }

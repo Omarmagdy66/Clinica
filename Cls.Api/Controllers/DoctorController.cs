@@ -18,10 +18,9 @@ namespace Controllers
         {
 
         }
-        [HttpGet]
+        [HttpGet("GetAllDoctors")]
         public async Task<IActionResult> GetAllDoctors()
         {
-            //var doctors = await _unitOfWork.Doctors.GetAllAsync();
             return Ok(await _unitOfWork.Doctors.GetAllAsync());
         }
         [HttpGet("GetById")]
@@ -30,29 +29,6 @@ namespace Controllers
             var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
             if (doctor == null)
             {
-//                 Examinationduration = doctordto.Examinationduration,
-//                 Name = doctordto.Name,
-//                 Bio = doctordto.Bio,
-//                 Email = doctordto.Email,
-//                 Image = doctordto.Image,
-//                 Password = doctordto.Password,
-//                 PhoneNumber = doctordto.PhoneNumber,
-//                 Price = doctordto.Price,
-//                 SpecializationId = doctordto.SpecializationId,
-//                 DoctorCLinics = new List<DoctorCLinic>()
-//             };
-
-            
-//             var doctorClinic = new DoctorCLinic()
-//             {
-//                 ClinicId = doctordto.ClinicId,
-//                 Doctor = doctor 
-//             };
-
-//             doctor.DoctorCLinics.Add(doctorClinic);
-//             await _unitOfWork.Doctors.AddAsync(doctor);
-//             _unitOfWork.Save();
-//             return Ok("Created!");
                 return BadRequest("Invalid Id");
             }
             return Ok(doctor);
@@ -80,20 +56,14 @@ namespace Controllers
                     Email = doctordto.Email,
                     Password = doctordto.Password,
                     PhoneNumber = doctordto.PhoneNumber,
- 
-                     SpecializationId = doctordto.SpecializationId,
-                     Price = doctordto.Price,
-                     Bio=doctordto.Bio, 
-                     Image=doctordto.Image, 
+                    Examinationduration = doctordto.Examinationduration,
+                    SpecializationId = doctordto.SpecializationId,
+                    Price = doctordto.Price,
+                    Bio=doctordto.Bio, 
+                    Image=doctordto.Image, 
                     DoctorCLinics = new List<DoctorCLinic>()
 
                 };
-
-              
-
-                       
-                    
-                
                 await _unitOfWork.Doctors.AddAsync(doctor);
                 _unitOfWork.Save();
                 return Ok("Created!");
@@ -123,9 +93,9 @@ namespace Controllers
                 doctor.SpecializationId = doctordto.SpecializationId;
                 doctor.Bio=doctordto.Bio;   
                 doctor.Price=doctordto.Price;   
-                doctor.Image=doctordto.Image;   
-               
-
+                doctor.Image=doctordto.Image;
+                doctor.Examinationduration=doctordto.Examinationduration; 
+                 
                 _unitOfWork.Save();
                 return Ok("Updated!");
             }

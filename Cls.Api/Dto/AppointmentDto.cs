@@ -7,9 +7,8 @@
     public string? PatientNameIN { get; set; }
     public string? PatientNumberIN { get; set; }
     public string? PatientEmailIN { get; set; }
-    public DateOnly AppointmentDate { get; set; }
-    public TimeSpan TimeSlot { get; set; }
-    public string? Status { get; set; } // "booked", "cancelled", "completed"
+    public DateTime AppointmentDate { get; set; }
+    public TimeOnly TimeSlot { get; set; }
     public bool? Teleconsultation { get; set; }
 
 

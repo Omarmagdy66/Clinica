@@ -22,6 +22,29 @@ namespace Cls.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Models.Admin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Admins");
+                });
+
             modelBuilder.Entity("Models.Appointment", b =>
                 {
                     b.Property<int>("Id")
@@ -222,23 +245,15 @@ namespace Cls.DAL.Migrations
 
             modelBuilder.Entity("Models.DoctorCLinic", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("DoctorId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClinicId")
                         .HasColumnType("int");
 
-                    b.Property<int>("DoctorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("DoctorId", "ClinicId");
 
                     b.HasIndex("ClinicId");
-
-                    b.HasIndex("DoctorId");
 
                     b.ToTable("DoctorCLinics");
                 });
@@ -276,6 +291,28 @@ namespace Cls.DAL.Migrations
                     b.HasIndex("DoctorId");
 
                     b.ToTable("Schedules");
+                });
+
+            modelBuilder.Entity("Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Doctorid")
+                        .HasColumnType("int");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Doctorid");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Models.Nurse", b =>
@@ -317,6 +354,65 @@ namespace Cls.DAL.Migrations
                     b.ToTable("Nurses");
                 });
 
+            modelBuilder.Entity("Models.NurseAdminRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClinicName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NurseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId");
+
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("NurseId");
+
+                    b.ToTable("NusreAdminRequests");
+                });
+
+            modelBuilder.Entity("Models.NurseNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Nurseid")
+                        .HasColumnType("int");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Nurseid");
+
+                    b.ToTable("NurseNotifications");
+                });
+
             modelBuilder.Entity("Models.Patient", b =>
                 {
                     b.Property<int>("Id")
@@ -325,8 +421,8 @@ namespace Cls.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly>("Birthday")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("Birthday")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -343,8 +439,8 @@ namespace Cls.DAL.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("RegistrationDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("RegistrationDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -400,8 +496,8 @@ namespace Cls.DAL.Migrations
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly?>("ReviewDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("ReviewDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ReviewText")
                         .HasColumnType("nvarchar(max)");
@@ -472,6 +568,43 @@ namespace Cls.DAL.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Models.adminRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClinicName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CityId");
+
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("AdminRequests");
                 });
 
             modelBuilder.Entity("Models.Appointment", b =>
@@ -548,13 +681,13 @@ namespace Cls.DAL.Migrations
             modelBuilder.Entity("Models.DoctorCLinic", b =>
                 {
                     b.HasOne("Models.Clinic", "Clinic")
-                        .WithMany()
+                        .WithMany("DoctorCLinics")
                         .HasForeignKey("ClinicId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Models.Doctor", "Doctor")
-                        .WithMany()
+                        .WithMany("DoctorCLinics")
                         .HasForeignKey("DoctorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -579,6 +712,15 @@ namespace Cls.DAL.Migrations
                     b.Navigation("Doctor");
                 });
 
+            modelBuilder.Entity("Models.Notification", b =>
+                {
+                    b.HasOne("Models.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("Doctorid");
+
+                    b.Navigation("Doctor");
+                });
+
             modelBuilder.Entity("Models.Nurse", b =>
                 {
                     b.HasOne("Models.Clinic", "clinic")
@@ -586,6 +728,38 @@ namespace Cls.DAL.Migrations
                         .HasForeignKey("ClinicId");
 
                     b.Navigation("clinic");
+                });
+
+            modelBuilder.Entity("Models.NurseAdminRequest", b =>
+                {
+                    b.HasOne("Models.City", "City")
+                        .WithMany()
+                        .HasForeignKey("CityId");
+
+                    b.HasOne("Models.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId");
+
+                    b.HasOne("Models.Nurse", "Nurse")
+                        .WithMany()
+                        .HasForeignKey("NurseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("City");
+
+                    b.Navigation("Country");
+
+                    b.Navigation("Nurse");
+                });
+
+            modelBuilder.Entity("Models.NurseNotification", b =>
+                {
+                    b.HasOne("Models.Nurse", "Nurse")
+                        .WithMany()
+                        .HasForeignKey("Nurseid");
+
+                    b.Navigation("Nurse");
                 });
 
             modelBuilder.Entity("Models.Query", b =>
@@ -633,6 +807,39 @@ namespace Cls.DAL.Migrations
                         .HasForeignKey("RoleId");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("Models.adminRequest", b =>
+                {
+                    b.HasOne("Models.City", "City")
+                        .WithMany()
+                        .HasForeignKey("CityId");
+
+                    b.HasOne("Models.Country", "Country")
+                        .WithMany()
+                        .HasForeignKey("CountryId");
+
+                    b.HasOne("Models.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("City");
+
+                    b.Navigation("Country");
+
+                    b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("Models.Clinic", b =>
+                {
+                    b.Navigation("DoctorCLinics");
+                });
+
+            modelBuilder.Entity("Models.Doctor", b =>
+                {
+                    b.Navigation("DoctorCLinics");
                 });
 #pragma warning restore 612, 618
         }

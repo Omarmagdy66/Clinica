@@ -1,4 +1,12 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿function searchDoctor() {
+    // Simulate a search result and navigate to the doctor details page
+    const doctorName = document.getElementById('doctor-name').value;
+    const specialty = document.getElementById('specialty').value;
+    const city = document.getElementById('city').value;
 
-// Write your JavaScript code.
+    if (doctorName || (specialty && city)) {
+        window.location.href = ;
+    } else {
+        alert("Please enter search criteria");
+    }
+}

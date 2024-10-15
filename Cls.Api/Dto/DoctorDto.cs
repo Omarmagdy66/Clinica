@@ -15,6 +15,5 @@ public class DoctorDto
     public string? Image { get; set; }
     [DataType("decimal(8,2)")]
     public double? Price { get; set; }
-    public int ClinicId { get; set; }
     
 }

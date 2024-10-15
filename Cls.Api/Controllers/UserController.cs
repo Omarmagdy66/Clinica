@@ -18,7 +18,7 @@ public class UserController : APIBaseController
     private readonly IConfiguration configuration;
     private readonly JwtService jwt;
 
-    public UserController(IUnitOfWork unitOfWork,IConfiguration configuration) : base(unitOfWork)
+    public UserController(IUnitOfWork unitOfWork, IConfiguration configuration) : base(unitOfWork)
     {
         this.configuration = configuration;
         this.jwt = new JwtService(configuration);
@@ -31,24 +31,24 @@ public class UserController : APIBaseController
 
     }
     [HttpGet("GetById")]
-    public IActionResult GetAllPatiant(int id)
+    public IActionResult GetById(int id)
     {
-       var User = _unitOfWork.Users.GetById(id);
-        if(User == null) return BadRequest("Invalid Id");
+        var User = _unitOfWork.Users.GetById(id);
+        if (User == null) return BadRequest("Invalid Id");
         return Ok(User);
     }
     [HttpPost("PatientRegister")]
-    public async Task<IActionResult> CreateAsync(PatientRegesterDto dto)
+    public async Task<IActionResult> PatientRegister(PatientRegesterDto dto)
     {
-        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.UserName);
+        var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == dto.UserName || u.Email == dto.Email);
         if (user1 != null)
-            return BadRequest("Username already Exist!");
+            return BadRequest("Username Or Email already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
-            Name = dto.UserName,
+            UserName = dto.UserName,
             Email = dto.Email,
-            Password =hashedPassword,
+            Password = hashedPassword,
             RoleId = 2
         };
         _unitOfWork.Users.Add(user);
@@ -60,26 +60,24 @@ public class UserController : APIBaseController
             Gender = dto.Gender,
             PhoneNumber = dto.PhoneNumber,
             Birthday = dto.Birthday,
-            //RegistrationDate = DateTime.Now
-             
         };
         _unitOfWork.Patients.Add(P);
         _unitOfWork.Save();
         return Ok("Created");
     }
-    
+
     [HttpPost("DoctorRegister")]
     public async Task<IActionResult> CreateDoctorAsync(DoctorRegisterDto dto)
     {
-        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.UserName);
+        var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == dto.UserName || u.Email == dto.Email);
         if (user1 != null)
-            return BadRequest("Username already Exist!");
+            return BadRequest("Username or Email already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
-            Name = dto.UserName,
+            UserName = dto.UserName,
             Email = dto.Email,
-            Password =hashedPassword,
+            Password = hashedPassword,
             RoleId = 3
         };
         _unitOfWork.Users.Add(user);
@@ -88,28 +86,27 @@ public class UserController : APIBaseController
             Name = dto.Name,
             Email = dto.Email,
             Password = hashedPassword,
-            SpecializationId =dto.SpecializationId,
+            SpecializationId = dto.SpecializationId,
             PhoneNumber = dto.PhoneNumber,
-            Price= dto.Price,
-            Bio=dto.Bio,
-            Examinationduration=dto.Examinationduration,
-            Image= dto.Image
-            //RegistrationDate = DateTime.Now
+            Price = dto.Price,
+            Bio = dto.Bio,
+            Examinationduration = dto.Examinationduration,
+            //Image= dto.Image
         };
         _unitOfWork.Doctors.Add(d);
         _unitOfWork.Save();
         return Ok("Created");
     }
     [HttpPost("NurseRegister")]
-    public async Task<IActionResult> CreateNurseAsync(NurseDto dto)
+    public async Task<IActionResult> CreateNurseAsync(NurseRegesterDto dto)
     {
-        var user1 = await _unitOfWork.Users.GetByNameAsync(dto.Name);
+        var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == dto.UserName || u.Email == dto.Email);
         if (user1 != null)
             return BadRequest("Username already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
-            Name = dto.Name,
+            UserName = dto.Name,
             Email = dto.Email,
             Password = hashedPassword,
             RoleId = 4
@@ -120,13 +117,12 @@ public class UserController : APIBaseController
             Name = dto.Name,
             Email = dto.Email,
             Password = hashedPassword,
-            ClinicId=dto.ClinicId,  
+            ClinicId = dto.ClinicId,
             PhoneNumber = dto.PhoneNumber,
             Price = dto.Price,
             Bio = dto.Bio,
-           
+
             Image = dto.Image,
-            //RegistrationDate = DateTime.Now
         };
         _unitOfWork.Nurses.Add(d);
         _unitOfWork.Save();
@@ -134,12 +130,38 @@ public class UserController : APIBaseController
     }
 
 
+    [HttpPost("CreateAdmin")]
+    public async Task<IActionResult> CreateAdmin(UserDto userDto)
+    {
+        if (ModelState.IsValid)
+        {
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            var User = new User()
+            {
+                UserName = userDto.UserName,
+                Email = userDto.Email,
+                Password = hashedPassword,
+                RoleId = 1
+            };
+            await _unitOfWork.Users.AddAsync(User);
+            var admin = new Admin()
+            {
+                Name = userDto.UserName,
+                Email = userDto.Email,
+                Password = hashedPassword,
+            };
+            await _unitOfWork.Admins.AddAsync(admin);
+            _unitOfWork.Save();
+            return Ok("Created!");
+        }
+        return BadRequest($"ther are {ModelState.ErrorCount} errors");
+    }
     [HttpPut("Update")]
     public IActionResult Update(int id)
     {
         var user = _unitOfWork.Users.GetById(id);
-        if(user == null) return BadRequest();
-         _unitOfWork.Users.Update(user);
+        if (user == null) return BadRequest();
+        _unitOfWork.Users.Update(user);
         _unitOfWork.Save();
         return Ok("Updated");
     }
@@ -148,7 +170,7 @@ public class UserController : APIBaseController
     public IActionResult Delete(int id)
     {
         var user = _unitOfWork.Users.GetById(id);
-        if(user == null) return BadRequest();
+        if (user == null) return BadRequest();
         _unitOfWork.Users.Delete(user);
         _unitOfWork.Save();
         return Ok("Deleted");
@@ -159,29 +181,69 @@ public class UserController : APIBaseController
         if (ModelState.IsValid)
         {
             // Query by either username or email
-            User user = await _unitOfWork.Users.FindAsync( u => u.Name == loginDto.Name );
+            User user = await _unitOfWork.Users.FindAsync(u => u.UserName == loginDto.UserName);
             if (user == null)
             {
-                user= await _unitOfWork.Users.FindAsync(u=>u.Email == loginDto.Name);
+                user = await _unitOfWork.Users.FindAsync(u => u.Email == loginDto.UserName);
             }
 
             if (user == null) return BadRequest("Username or Password is incorrect");
-            //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginDto.Password);
+
+            // Verify password
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password);
-
-
             if (!isPasswordValid) return BadRequest("Username or Password is incorrect");
 
+            // Get the role of the user
             var role = _unitOfWork.Roles.GetById((int)user.RoleId);
+            if (role == null) return BadRequest("Invalid role");
 
-            return Ok(new
+            // Role-based logic
+            switch (user.RoleId)
             {
-                token = jwt.GenerateJSONWebToken(user, role.RoleName),
-                expiration = DateTime.UtcNow.AddHours(1)
-            });
+                case 1: // Admin
+                    var admin = await _unitOfWork.Admins.FindAsync(a => a.Email == user.Email);
+                    if (admin == null) return BadRequest("Admin not found");
+                    return Ok(new
+                    {
+                        token = jwt.GenerateJSONWebToken(admin, user.RoleId.ToString()),
+                        expiration = DateTime.UtcNow.AddHours(1)
+                    });
+
+                case 2: // Patient
+                    var patient = await _unitOfWork.Patients.FindAsync(p => p.Email == user.Email);
+                    if (patient == null) return BadRequest("Patient not found");
+                    return Ok(new
+                    {
+                        token = jwt.GenerateJSONWebToken(patient, user.RoleId.ToString()),
+                        expiration = DateTime.UtcNow.AddHours(1)
+                    });
+
+                case 3: // Doctor
+                    var doctor = await _unitOfWork.Doctors.FindAsync(d => d.Email == user.Email);
+                    if (doctor == null) return BadRequest("Doctor not found");
+                    return Ok(new
+                    {
+                        token = jwt.GenerateJSONWebToken(doctor, user.RoleId.ToString()),
+                        expiration = DateTime.UtcNow.AddHours(1)
+                    });
+
+                case 4: // Nurse
+                    var nurse = await _unitOfWork.Nurses.FindAsync(n => n.Email == user.Email);
+                    if (nurse == null) return BadRequest("Nurse not found");
+                    return Ok(new
+                    {
+                        token = jwt.GenerateJSONWebToken(nurse, user.RoleId.ToString()),
+                        expiration = DateTime.UtcNow.AddHours(1)
+                    });
+
+                default:
+                    return BadRequest("Invalid role");
+            }
         }
+
         return BadRequest(ModelState);
     }
-
-
 }
+
+
+

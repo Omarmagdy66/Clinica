@@ -1,0 +1,31 @@
+﻿<div class="search-container">
+    <h2>Book a Doctor</h2>
+    <form asp-controller="DoctorCards" asp-action="Index" method="get">
+        <div class="search-bar">
+            <select id="specialty" name="specialty">
+                <option value="" disabled selected>Select Specialty</option>
+                <option value="cardiology">Cardiology</option>
+                <option value="dentistry">Dentistry</option>
+                <!-- Add more specialties here -->
+            </select>
+
+            <select id="city" name="city">
+                <option value="" disabled selected>Select City</option>
+                <option value="Cairo">Cairo</option>
+                <option value="Alexandria">Alexandria</option>
+                <!-- Add more cities here -->
+            </select>
+
+            <select id="area" name="area">
+                <option value="" disabled selected>Select Area</option>
+                <option value="Downtown">Downtown</option>
+                <option value="Zamalek">Zamalek</option>
+                <!-- Add more areas here -->
+            </select>
+
+            <input type="text" id="doctor-name" name="doctorName" placeholder="Doctor name or hospital">
+
+            <button type="submit">Search</button>
+        </div>
+    </form>
+</div>

@@ -6,11 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Cls.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Db : Migration
+    public partial class ClinicaDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Admins",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Admins", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Countries",
                 columns: table => new
@@ -35,8 +50,8 @@ namespace Cls.DAL.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Birthday = table.Column<DateOnly>(type: "date", nullable: false),
-                    RegistrationDate = table.Column<DateOnly>(type: "date", nullable: false)
+                    Birthday = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -195,6 +210,40 @@ namespace Cls.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AdminRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClinicName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CityId = table.Column<int>(type: "int", nullable: true),
+                    CountryId = table.Column<int>(type: "int", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DoctorId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdminRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AdminRequests_Cities_CityId",
+                        column: x => x.CityId,
+                        principalTable: "Cities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AdminRequests_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AdminRequests_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Appointments",
                 columns: table => new
                 {
@@ -228,6 +277,25 @@ namespace Cls.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Doctorid = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Doctors_Doctorid",
+                        column: x => x.Doctorid,
+                        principalTable: "Doctors",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reviews",
                 columns: table => new
                 {
@@ -237,7 +305,7 @@ namespace Cls.DAL.Migrations
                     DoctorId = table.Column<int>(type: "int", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
                     ReviewText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ReviewDate = table.Column<DateOnly>(type: "date", nullable: true)
+                    ReviewDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -252,6 +320,30 @@ namespace Cls.DAL.Migrations
                         name: "FK_Reviews_Patients_PatientId",
                         column: x => x.PatientId,
                         principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DoctorCLinics",
+                columns: table => new
+                {
+                    DoctorId = table.Column<int>(type: "int", nullable: false),
+                    ClinicId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DoctorCLinics", x => new { x.DoctorId, x.ClinicId });
+                    table.ForeignKey(
+                        name: "FK_DoctorCLinics_Clinics_ClinicId",
+                        column: x => x.ClinicId,
+                        principalTable: "Clinics",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DoctorCLinics_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -338,6 +430,74 @@ namespace Cls.DAL.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "NurseNotifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Nurseid = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NurseNotifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NurseNotifications_Nurses_Nurseid",
+                        column: x => x.Nurseid,
+                        principalTable: "Nurses",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NusreAdminRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClinicName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CityId = table.Column<int>(type: "int", nullable: true),
+                    CountryId = table.Column<int>(type: "int", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NurseId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NusreAdminRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NusreAdminRequests_Cities_CityId",
+                        column: x => x.CityId,
+                        principalTable: "Cities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_NusreAdminRequests_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_NusreAdminRequests_Nurses_NurseId",
+                        column: x => x.NurseId,
+                        principalTable: "Nurses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminRequests_CityId",
+                table: "AdminRequests",
+                column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminRequests_CountryId",
+                table: "AdminRequests",
+                column: "CountryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminRequests_DoctorId",
+                table: "AdminRequests",
+                column: "DoctorId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_DoctorId",
                 table: "Appointments",
@@ -374,14 +534,44 @@ namespace Cls.DAL.Migrations
                 column: "CountryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DoctorCLinics_ClinicId",
+                table: "DoctorCLinics",
+                column: "ClinicId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Doctors_SpecializationId",
                 table: "Doctors",
                 column: "SpecializationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_Doctorid",
+                table: "Notifications",
+                column: "Doctorid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NurseNotifications_Nurseid",
+                table: "NurseNotifications",
+                column: "Nurseid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Nurses_ClinicId",
                 table: "Nurses",
                 column: "ClinicId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NusreAdminRequests_CityId",
+                table: "NusreAdminRequests",
+                column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NusreAdminRequests_CountryId",
+                table: "NusreAdminRequests",
+                column: "CountryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NusreAdminRequests_NurseId",
+                table: "NusreAdminRequests",
+                column: "NurseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Queries_PatientId",
@@ -423,10 +613,25 @@ namespace Cls.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AdminRequests");
+
+            migrationBuilder.DropTable(
+                name: "Admins");
+
+            migrationBuilder.DropTable(
                 name: "Billings");
 
             migrationBuilder.DropTable(
-                name: "Nurses");
+                name: "DoctorCLinics");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
+                name: "NurseNotifications");
+
+            migrationBuilder.DropTable(
+                name: "NusreAdminRequests");
 
             migrationBuilder.DropTable(
                 name: "Queries");
@@ -441,10 +646,10 @@ namespace Cls.DAL.Migrations
                 name: "Appointments");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Nurses");
 
             migrationBuilder.DropTable(
-                name: "Clinics");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Doctors");
@@ -453,13 +658,16 @@ namespace Cls.DAL.Migrations
                 name: "Patients");
 
             migrationBuilder.DropTable(
+                name: "Clinics");
+
+            migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "Cities");
+                name: "Specializations");
 
             migrationBuilder.DropTable(
-                name: "Specializations");
+                name: "Cities");
 
             migrationBuilder.DropTable(
                 name: "Countries");

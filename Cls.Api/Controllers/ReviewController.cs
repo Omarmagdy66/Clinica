@@ -32,17 +32,27 @@ public class ReviewController : APIBaseController
     {
         if (ModelState.IsValid)
         {
-            var Review = new Review()
+            //var hasReviewed = _unitOfWork.Reviews.IsExist(r => r.PatientId == reviewdto.PatientId && r.DoctorId == reviewdto.DoctorId);
+
+            var appointment = await _unitOfWork.Appointments.FindAsync(a =>
+            a.PatientId == reviewdto.PatientId &&
+            a.DoctorId == reviewdto.DoctorId &&
+            a.Status == "completed");
+            if (appointment != null)
             {
-                PatientId = reviewdto.PatientId,
-                DoctorId = reviewdto.DoctorId,
-                Rating = reviewdto.Rating,
-                ReviewText = reviewdto.ReviewText,
-                ReviewDate = reviewdto.ReviewDate,
-            };
-            await _unitOfWork.Reviews.AddAsync(Review);
-            _unitOfWork.Save();
-            return Ok("Created!");
+                var Review = new Review()
+                {
+                    PatientId = reviewdto.PatientId,
+                    DoctorId = reviewdto.DoctorId,
+                    Rating = reviewdto.Rating,
+                    ReviewText = reviewdto.ReviewText,
+                    ReviewDate = reviewdto.ReviewDate,
+                };
+                await _unitOfWork.Reviews.AddAsync(Review);
+                _unitOfWork.Save();
+                return Ok("Created!");
+            }
+            return BadRequest("Patient must have a completed appointment with this doctor to submit a review.");
         }
         return BadRequest($"ther are {ModelState.ErrorCount} errors");
     }
@@ -61,7 +71,7 @@ public class ReviewController : APIBaseController
             Review.Rating = reviewdto.Rating;
             Review.ReviewText = reviewdto.ReviewText;
             Review.ReviewDate = reviewdto.ReviewDate;
-			_unitOfWork.Reviews.Update(Review);
+            _unitOfWork.Reviews.Update(Review);
             _unitOfWork.Save();
             return Ok("Updated Sucsessfully");
         }
@@ -80,6 +90,8 @@ public class ReviewController : APIBaseController
         _unitOfWork.Save();
         return Ok("Deleted Sucsessfuly");
     }
+
+    //how
     [HttpGet("GetReviewsForDoctor")]
     public async Task<IActionResult> GetReviewsForDoctor(int doctorId)
     {
@@ -93,6 +105,7 @@ public class ReviewController : APIBaseController
         var averageRating = reviews.Average(r => r.Rating);
         return Ok(new { averageRating });
     }
+    //what is benefit?
     [HttpGet("GetReviewsForUser")]
     public async Task<IActionResult> GetReviewsForUser(int patientId)
     {
@@ -116,13 +129,13 @@ public class ReviewController : APIBaseController
     //    return Ok(new { message = "Review flagged." });
     //}
 
-    [HttpGet("CheckUserReviewedDoctor")]
-    public  IActionResult HasUserReviewedDoctor(int patientId, int doctorId)
-    {
-        var hasReviewed =  _unitOfWork.Reviews.IsExist(r => r.PatientId == patientId && r.DoctorId == doctorId);
+    //[HttpGet("CheckUserReviewedDoctor")]
+    //public IActionResult HasUserReviewedDoctor(int patientId, int doctorId)
+    //{
+    //    var hasReviewed = _unitOfWork.Reviews.IsExist(r => r.PatientId == patientId && r.DoctorId == doctorId);
 
-        return Ok(new { hasReviewed });
-    }
+    //    return Ok(new { hasReviewed });
+    //}
     //[HttpGet("flagged")]
     //public async Task<IActionResult> GetFlaggedReviews()
     //{
