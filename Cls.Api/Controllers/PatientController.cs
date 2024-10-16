@@ -17,12 +17,12 @@ public class PatientController : APIBaseController
     }
 
     [HttpGet("GetAll")]
-    [Authorize]
+    [Authorize (Roles = "1")]
     public async Task<IActionResult> GetAll()
     {
         return Ok(await _unitOfWork.Patients.GetAllAsync());
     }
-    [HttpGet("{id}")]
+    [HttpGet("GetPatientById")]
     public async Task<IActionResult> GetPatientById(int id)
     {
         var patient = await _unitOfWork.Patients.GetByIdAsync(id);
@@ -32,21 +32,30 @@ public class PatientController : APIBaseController
         }
         return Ok(patient);
     }
-    [HttpPost]
+    [HttpPost("AddPatient")]
+    [Authorize(Roles = "1")]
     public async Task<IActionResult> AddPatient(PatientDto patientdto)
     {
         if (ModelState.IsValid)
         {
+            var hashpass = BCrypt.Net.BCrypt.HashPassword(patientdto.Password);
+            var user = new User()
+            {
+                UserName = patientdto.Name,
+                Email = patientdto.Email,
+                Password = hashpass,
+            };
             var patient = new Patient()
             {
                 Name = patientdto.Name,
                 Email = patientdto.Email,
                 Birthday = patientdto.Birthday,
                 Gender = patientdto.Gender,
-                Password = patientdto.Password,
+                Password = hashpass,
                 PhoneNumber = patientdto.PhoneNumber,
                 RegistrationDate = patientdto.RegistrationDate
             };
+            await _unitOfWork.Users.AddAsync(user);
             await _unitOfWork.Patients.AddAsync(patient);
             _unitOfWork.Save();
             return Ok("Created!");

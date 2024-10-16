@@ -9,5 +9,5 @@ namespace Dto;
     public string? PhoneNumber { get; set; }
     public string? Gender { get; set; }
     public DateTime? Birthday { get; set; }
-    public DateTime? RegistrationDate { get; set; }= DateTime.Now.Date;
+    public DateTime? RegistrationDate { get; set; } = DateTime.Now.Date;
 }

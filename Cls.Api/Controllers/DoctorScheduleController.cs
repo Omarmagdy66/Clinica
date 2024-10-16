@@ -3,6 +3,7 @@ using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using System.Security.Claims;
 
 namespace Controllers;
 
@@ -13,14 +14,18 @@ public class DoctorScheduleController : APIBaseController
     public DoctorScheduleController(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
-    [HttpGet]
-    [Authorize(Roles = "Doctor")]
+
+
+    [HttpGet("GetAllSchedules")]
+    [Authorize(Roles = "1")]
     public async Task<IActionResult> GetAllSchedules()
     {
-        //var Schedules = await _unitOfWork.Schedules.GetAllAsync();
         return Ok(await _unitOfWork.Schedules.GetAllAsync());
     }
-    [HttpGet("{id}")]
+
+
+    [HttpGet("GetDoctorScheduleById")]
+    [Authorize(Roles = "1")]
     public async Task<IActionResult> GetDoctorScheduleById(int id)
     {
         var schedule = await _unitOfWork.Schedules.GetByIdAsync(id);
@@ -30,50 +35,137 @@ public class DoctorScheduleController : APIBaseController
         }
         return Ok(schedule);
     }
-    [HttpPost]
+
+
+    [HttpPost("AddDoctorSchedule")]
+    [Authorize(Roles = "3")]
     public async Task<IActionResult> AddDoctorSchedule(DoctorScheduleDto scheduledto)
     {
         if (ModelState.IsValid)
         {
-            var schedule = new DoctorSchedule()
+            // Extract DoctorId from token
+            var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (doctorIdClaim == null)
             {
-                 ClinicId= scheduledto.ClinicId,    
-                DoctorId = scheduledto.DoctorId,
-                Day = scheduledto.Day,
-                AvailableFrom = scheduledto.AvailableFrom,
-                AvailableTo = scheduledto.AvailableTo,
-                Status = scheduledto.Status,
-            };
-            await _unitOfWork.Schedules.AddAsync(schedule);
+                return Unauthorized("Doctor ID not found in token.");
+            }
+
+            if (!int.TryParse(doctorIdClaim, out int doctorId))
+            {
+                return BadRequest("Invalid Doctor ID in token.");
+            }
+
+            // Check if ClinicId and Time slots are provided
+            if (scheduledto.ClinicId == null || scheduledto.AvailableFrom == null || scheduledto.AvailableTo == null)
+            {
+                return BadRequest("ClinicId, AvailableFrom, and AvailableTo fields are required.");
+            }
+
+            // Get doctor's examination duration from the database
+            var doctor = await _unitOfWork.Doctors.FindAsync(d => d.Id == doctorId);
+            if (doctor == null)
+            {
+                return NotFound("Doctor not found.");
+            }
+
+            if (!doctor.Examinationduration.HasValue)
+            {
+                return BadRequest("Doctor's examination duration is not set.");
+            }
+
+            int duration = doctor.Examinationduration.Value;
+
+            // Check if there are overlapping schedules for the same doctor on the same day
+            var existingSchedules = await _unitOfWork.Schedules.FindAllAsync(s =>
+                s.DoctorId == doctorId &&
+                s.Day == scheduledto.Day &&
+                ((scheduledto.AvailableFrom >= s.AvailableFrom && scheduledto.AvailableFrom < s.AvailableTo) ||
+                 (scheduledto.AvailableTo > s.AvailableFrom && scheduledto.AvailableTo <= s.AvailableTo) ||
+                 (scheduledto.AvailableFrom <= s.AvailableFrom && scheduledto.AvailableTo >= s.AvailableTo))
+            );
+
+            if (existingSchedules.Any())
+            {
+                return BadRequest("A conflicting schedule exists for the same date and time range.");
+            }
+
+            // Initialize the start and end time
+            TimeOnly startTime = scheduledto.AvailableFrom.Value;
+            TimeOnly endTime = scheduledto.AvailableTo.Value;
+
+            // Create list to hold the schedules
+            var schedules = new List<DoctorSchedule>();
+
+            // Generate time slots based on examination duration
+            while (startTime < endTime)
+            {
+                TimeOnly nextSlot = startTime.AddMinutes(duration);
+                if (nextSlot > endTime) break;
+
+                var schedule = new DoctorSchedule
+                {
+                    ClinicId = scheduledto.ClinicId.Value,
+                    DoctorId = doctorId,
+                    Day = scheduledto.Day.HasValue ? scheduledto.Day.Value : DateTime.Now, // Default to current day if not provided
+                    AvailableFrom = startTime,
+                    AvailableTo = nextSlot,
+                    Status = true
+                };
+
+                schedules.Add(schedule);
+                startTime = nextSlot; // Move to next time slot
+            }
+
+            // Add all schedules to the database
+            await _unitOfWork.Schedules.AddRangeAsync(schedules);
             _unitOfWork.Save();
-            return Ok("Created!");
+
+            return Ok("Doctor schedule created successfully!");
         }
-        return BadRequest($"ther are {ModelState.ErrorCount} errors");
-    }
-    [HttpPut("{id}")]
-    public async Task<IActionResult> EditDoctorSchedule(int id, [FromBody] DoctorScheduleDto scheduledto)
-    {
-        var schedule = await _unitOfWork.Schedules.GetByIdAsync(id);
-        if (schedule == null)
-        {
-            return BadRequest("Invalid Id");
-        }
-        if (ModelState.IsValid)
-        {
-            schedule.ClinicId = scheduledto.ClinicId;
-            schedule.DoctorId = scheduledto.DoctorId;
-            schedule.Day = scheduledto.Day;
-            schedule.AvailableFrom = scheduledto.AvailableFrom;
-            schedule.AvailableTo = scheduledto.AvailableTo;
-            schedule.Status = scheduledto.Status;
-            _unitOfWork.Schedules.Update(schedule);
-            _unitOfWork.Save();
-            return Ok("Updated!");
-        }
-        return BadRequest($"There are {ModelState.ErrorCount}");
+
+        return BadRequest($"There are {ModelState.ErrorCount} errors in the form.");
     }
 
-    [HttpDelete("{id}")]
+
+
+
+    //[HttpPut("EditDoctorSchedule")]
+    //public async Task<IActionResult> EditDoctorSchedule(int id, [FromBody] DoctorScheduleDto scheduledto)
+    //{
+    //    var schedule = await _unitOfWork.Schedules.GetByIdAsync(id);
+    //    if (schedule == null)
+    //    {
+    //        return BadRequest("Invalid Id");
+    //    }
+    //    if (ModelState.IsValid)
+    //    {
+    //        var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+    //        if (doctorIdClaim == null)
+    //        {
+    //            return Unauthorized("Doctor ID not found in token.");
+    //        }
+
+    //        // Parse the DoctorId
+    //        int doctorId;
+    //        if (!int.TryParse(doctorIdClaim, out doctorId))
+    //        {
+    //            return BadRequest("Invalid Doctor ID in token.");
+    //        }
+    //        schedule.ClinicId = scheduledto.ClinicId;
+    //        schedule.DoctorId = doctorId;
+    //        schedule.Day = scheduledto.Day;
+    //        schedule.AvailableFrom = scheduledto.AvailableFrom;
+    //        schedule.AvailableTo = scheduledto.AvailableTo;
+    //        schedule.Status = true;
+    //        _unitOfWork.Schedules.Update(schedule);
+    //        _unitOfWork.Save();
+    //        return Ok("Updated!");
+    //    }
+    //    return BadRequest($"There are {ModelState.ErrorCount}");
+    //}
+
+    [HttpDelete("DeleteDoctorSchedule")]
     public async Task<IActionResult> DeleteDoctorSchedule(int id)
     {
         var schedule = await _unitOfWork.Schedules.GetByIdAsync(id);
@@ -85,32 +177,80 @@ public class DoctorScheduleController : APIBaseController
         _unitOfWork.Save();
         return Ok("Deleted!");
     }
-    [HttpGet("ByDoctor/{doctorId}")]
-    public async Task<IActionResult> GetSchedulesByDoctorId(int doctorId)
+
+
+    [HttpGet("GetSchedulesByDoctorId")]
+    public async Task<IActionResult> GetSchedulesByDoctorId(int? idDoctor)
     {
+        var Role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+        if (Role == null)
+        {
+            return Unauthorized("Doctor ID not found in token.");
+        }
+
+        // Parse the DoctorId
+        int RoleId;
+        if (!int.TryParse(Role, out RoleId))
+        {
+            return BadRequest("Invalid Doctor ID in token.");
+        }
+        if(RoleId == 3) {
+        // Extract DoctorId from token
+        if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out int doctorId))
+        {
+            return Unauthorized("Doctor ID not found or invalid in token.");
+        }
+        
+
+        // Fetch doctor's schedules from the database
         var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.DoctorId == doctorId);
 
-        if (schedules == null || !schedules.Any())  // Check for null or empty list
+        // If no schedules are found, return NotFound status
+        if (schedules == null || !schedules.Any())
         {
             return NotFound($"No schedules found for Doctor with Id {doctorId}");
         }
 
-        return Ok(schedules);  // Return the list of schedules
+        // Return the schedules with OK status
+        return Ok(schedules);
+        }
+        else { 
+            // Fetch doctor's schedules from the database
+            var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.DoctorId == idDoctor);
+
+        // If no schedules are found, return NotFound status
+        if (schedules == null || !schedules.Any())
+        {
+            return NotFound($"No schedules found for Doctor with Id {idDoctor}");
+        }
+
+        // Return the schedules with OK status
+        return Ok(schedules);
+        }
     }
 
 
-    [HttpGet("ByClinic/{clinicId}")]
+
+    [HttpGet("GetSchedulesByClinicId")]
     public async Task<IActionResult> GetSchedulesByClinicId(int clinicId)
     {
+        // Fetch schedules for the specified clinic from the database
         var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.ClinicId == clinicId);
+
+        // If no schedules are found, return NotFound status
         if (schedules == null || !schedules.Any())
         {
             return NotFound($"No schedules found for Clinic with Id {clinicId}");
         }
+
+        // Return the list of schedules with OK status
         return Ok(schedules);
     }
 
-    [HttpGet("ByDate/{date}")]
+
+
+    [HttpGet("GetSchedulesByDate")]
     public async Task<IActionResult> GetSchedulesByDate(DateTime date)
     {
         var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.Day == date);
@@ -120,6 +260,7 @@ public class DoctorScheduleController : APIBaseController
         }
         return Ok(schedules);
     }
+
 
     [HttpGet("CheckAvailability")]
     public async Task<IActionResult> CheckAvailability(int doctorId, int clinicId, DateTime date, TimeOnly time)
@@ -138,7 +279,9 @@ public class DoctorScheduleController : APIBaseController
         }
         return Ok("Doctor is available");
     }
-    [HttpGet("FilterByStatus/{status}")]
+
+
+    [HttpGet("GetSchedulesByStatus")]
     public async Task<IActionResult> GetSchedulesByStatus(bool status)
     {
         var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.Status == status);

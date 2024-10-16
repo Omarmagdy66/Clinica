@@ -3,6 +3,7 @@ using Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Cls.DAL.Migrations;
 
 namespace Controllers
 {
@@ -15,14 +16,23 @@ namespace Controllers
 
         }
 
+        [HttpGet("GetAllRequests")]
+        [Authorize(Roles = "1")]
+        public async Task<IActionResult> GetAllRequests()
+        {
+            return Ok(await _unitOfWork.AdminRequests.GetAllAsync());
+        }
+
 
         [HttpPost("AdminResponseDoctor")]
         [Authorize(Roles = "1")]
         public async Task<IActionResult> AdminResponseDoctor(int id, int flag)
         {
             var request = await _unitOfWork.AdminRequests.GetByIdAsync(id);
+            var clinicname = await _unitOfWork.Clinics.FindAsync(n=>n.ClinicName == request.ClinicName);
             if (flag == 1)
             {
+                if(clinicname == null) { 
                 var clinic = new Clinic()
                 {
                     PhoneNumber = request.PhoneNumber,
@@ -52,6 +62,23 @@ namespace Controllers
                 _unitOfWork.Save();
 
                 return Ok("responsed");
+                }
+                else 
+                {
+                    var doctorclinic = new DoctorCLinic();
+                    doctorclinic.DoctorId = request.DoctorId;
+                    doctorclinic.ClinicId = clinicname.Id;
+                    await _unitOfWork.DoctorClinics.AddAsync(doctorclinic);
+                    var notification = new Notification();
+                    notification.Doctorid = request.DoctorId;
+                    notification.message = "the clinic whose addrease is " + request.Address + "added succefully ";
+                    await _unitOfWork.Notifications.AddAsync(notification);
+
+                    _unitOfWork.AdminRequests.Delete(request);
+                    _unitOfWork.Save();
+
+                    return Ok("responsed");
+                }
             }
 
             else
@@ -61,9 +88,12 @@ namespace Controllers
                 notification.message = "the clinic whose addrease is " + request.Address + "doesnt exits  ";
                 await _unitOfWork.Notifications.AddAsync(notification);
                 _unitOfWork.AdminRequests.Delete(request);
+                _unitOfWork.Save();
                 return Ok("responsed");
             }
         }
+
+
         [HttpPost("AdminResponseNurse")]
         [Authorize(Roles = "1")]
         public async Task<IActionResult> AdminResponseNurse(int id, int flag)

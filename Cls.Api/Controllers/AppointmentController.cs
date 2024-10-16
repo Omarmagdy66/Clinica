@@ -36,37 +36,161 @@ public class AppointmentController : APIBaseController
         return Ok(appointment);
     }
 
-
+    //not handel with patient
     [HttpPost("AddAppointment")]
-    [Authorize(Roles = "2,1")]
+    [Authorize(Roles = "2")]
+
     public async Task<IActionResult> AddAppointment(AppointmentDto appointmentdto)
     {
         if (ModelState.IsValid)
         {
+            // Extract patient ID from the token
+            var patientIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (patientIdClaim == null)
+            {
+                return Unauthorized("Patient ID not found in token.");
+            }
+
+            if (!int.TryParse(patientIdClaim, out int patientId))
+            {
+                return BadRequest("Invalid Patient ID in token.");
+            }
+
+            // Get the patient details from the database
+            var patient = await _unitOfWork.Patients.GetByIdAsync(patientId);
+            if (patient == null)
+            {
+                return NotFound("Patient not found.");
+            }
+
+            // Check if the time slot is available in the doctor's schedule and the status is 'true'
+            var schedule = await _unitOfWork.Schedules.FindAsync(s =>
+                s.DoctorId == appointmentdto.DoctorId &&
+                s.Day == appointmentdto.AppointmentDate.Date &&  // Ensure the same day
+                s.AvailableFrom <= appointmentdto.TimeSlot && s.AvailableTo > appointmentdto.TimeSlot &&  // Ensure the time slot matches
+                s.Status == true);  // Check if the slot is available
+
+            if (schedule == null)  // If no available schedule is found, return error
+            {
+                return BadRequest("This appointment time is not available or already booked.");
+            }
+
+            // Create the appointment entity
             var appointment = new Appointment()
             {
-                PatientEmailIN = appointmentdto.PatientEmailIN,
-                PatientNameIN = appointmentdto.PatientNameIN,
-                PatientNumberIN = appointmentdto.PatientNumberIN,
+                PatientEmailIN = patient.Email,
+                PatientNameIN = patient.Name,
+                PatientNumberIN = patient.PhoneNumber,
                 Teleconsultation = appointmentdto.Teleconsultation,
-                PatientId = appointmentdto.PatientId,
+                PatientId = patientId,
                 DoctorId = appointmentdto.DoctorId,
                 Status = "booked",
                 AppointmentDate = appointmentdto.AppointmentDate,
                 TimeSlot = appointmentdto.TimeSlot,
             };
+
+            // Save the appointment to the database
             await _unitOfWork.Appointments.AddAsync(appointment);
+
+            // Mark the time slot in the doctor's schedule as 'booked' (status = false)
+            schedule.Status = false;
+            _unitOfWork.Schedules.Update(schedule);
+
+            // Save all changes to the database
             _unitOfWork.Save();
-            return Ok("Created!");
+
+            return Ok("Appointment created and schedule updated successfully!");
         }
-        return BadRequest($"ther are {ModelState.ErrorCount} errors");
+
+        return BadRequest($"There are {ModelState.ErrorCount} errors in the form.");
     }
+
+
+    //ClinicId Not exist but it run successfully
+    //public async Task<IActionResult> AddAppointment(AppointmentDto appointmentdto)
+    //{
+    //    if (ModelState.IsValid)
+    //    {
+    //        // Extract patient ID from the token
+    //        var patientIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+    //        if (patientIdClaim == null)
+    //        {
+    //            return Unauthorized("Patient ID not found in token.");
+    //        }
+
+    //        if (!int.TryParse(patientIdClaim, out int patientId))
+    //        {
+    //            return BadRequest("Invalid Patient ID in token.");
+    //        }
+
+    //        // Get the patient details from the database
+    //        var patient = await _unitOfWork.Patients.GetByIdAsync(patientId);
+    //        if (patient == null)
+    //        {
+    //            return NotFound("Patient not found.");
+    //        }
+
+    //        // Create the appointment entity
+    //        var appointment = new Appointment()
+    //        {
+    //            PatientEmailIN = patient.Email,
+    //            PatientNameIN = patient.Name,
+    //            PatientNumberIN = patient.PhoneNumber,
+    //            Teleconsultation = appointmentdto.Teleconsultation,
+    //            PatientId = patientId,
+    //            DoctorId = appointmentdto.DoctorId,
+    //            Status = "booked",
+    //            AppointmentDate = appointmentdto.AppointmentDate,
+    //            TimeSlot = appointmentdto.TimeSlot,
+    //        };
+
+    //        // Save the appointment to the database
+    //        await _unitOfWork.Appointments.AddAsync(appointment);
+
+    //        // Find the doctor's schedule for the same day and time slot
+    //        var schedule = await _unitOfWork.Schedules.FindAsync(s =>
+    //            s.DoctorId == appointmentdto.DoctorId &&
+    //            s.Day == appointmentdto.AppointmentDate.Date && // Ensure same day
+    //            s.AvailableFrom <= appointmentdto.TimeSlot && s.AvailableTo > appointmentdto.TimeSlot); // Ensure same time slot
+
+    //        if (schedule == null)   
+    //        {
+    //            return BadRequest("No available schedule found for this doctor at the selected time.");
+    //        }
+
+    //        // Update the schedule status to 'false' (booked)
+    //        schedule.Status = false;
+    //        _unitOfWork.Schedules.Update(schedule);
+
+    //        // Save all changes to the database
+    //        _unitOfWork.Save();
+
+    //        return Ok("Appointment created and schedule updated successfully!");
+    //    }
+
+    //    return BadRequest($"There are {ModelState.ErrorCount} errors in the form.");
+    //}
+
 
 
     [HttpPut("EditAppointment")]
     [Authorize(Roles = "1")]
     public async Task<IActionResult> EditAppointment(int id, [FromBody] AppointmentDto appointmentdto)
     {
+        // Extract patient ID from the token
+        var patientIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (patientIdClaim == null)
+        {
+            return Unauthorized("Patient ID not found in token.");
+        }
+
+        if (!int.TryParse(patientIdClaim, out int patientId))
+        {
+            return BadRequest("Invalid Patient ID in token.");
+        }
+
+        // Get the patient details from the database
+        var patient = await _unitOfWork.Patients.GetByIdAsync(patientId);
         var appointment = await _unitOfWork.Appointments.GetByIdAsync(id);
         if (appointment == null)
         {
@@ -75,11 +199,11 @@ public class AppointmentController : APIBaseController
         if (ModelState.IsValid)
         {
             appointment.TimeSlot = appointmentdto.TimeSlot;
-            appointment.PatientEmailIN = appointmentdto.PatientEmailIN;
-            appointment.PatientNameIN = appointmentdto.PatientNameIN;
-            appointment.PatientNumberIN = appointmentdto.PatientNumberIN;
+            appointment.PatientEmailIN = patient.Email;
+            appointment.PatientNameIN = patient.Name;
+            appointment.PatientNumberIN = patient.PhoneNumber;
             appointment.Teleconsultation = appointmentdto.Teleconsultation;
-            appointment.PatientId = appointmentdto.PatientId;
+            appointment.PatientId = patientId;
             appointment.DoctorId = appointmentdto.DoctorId;
             appointment.AppointmentDate = appointmentdto.AppointmentDate;
             _unitOfWork.Appointments.Update(appointment);
@@ -90,17 +214,22 @@ public class AppointmentController : APIBaseController
     }
 
 
-
     [HttpDelete("DeleteAppointment")]
     [Authorize(Roles = "2,1")]
     public async Task<IActionResult> DeleteAppointment(int id)
     {
         var appointment = await _unitOfWork.Appointments.GetByIdAsync(id);
-        if (appointment == null)
+        appointment.Status = "Cancelld";
+        _unitOfWork.Appointments.Update(appointment);
+
+        var schedule = await _unitOfWork.Schedules.FindAsync(s =>s.DoctorId == appointment.DoctorId && s.Day == appointment.AppointmentDate && s.AvailableFrom == appointment.TimeSlot);
+        if (schedule == null)
         {
-            return BadRequest("Invalid Id");
+            return BadRequest("No available schedule found for this doctor at the selected time.");
         }
-        _unitOfWork.Appointments.Delete(appointment);
+
+        schedule.Status = true;
+        _unitOfWork.Schedules.Update(schedule);
         _unitOfWork.Save();
         return Ok("Deleted!");
     }
@@ -153,10 +282,10 @@ public class AppointmentController : APIBaseController
 
     [HttpGet("GetAppointmentsByPatient")]
     [Authorize(Roles = "1")]
-    public async Task<IActionResult> GetAppointmentsByPatient(int? Patientid , string name)
+    public async Task<IActionResult> GetAppointmentsByPatient(int? Patientid , string? name)
     {
-        var doctor = await _unitOfWork.Doctors.FindAsync(a => a.Id == Patientid || a.Name == name);
-        var appointments = await _unitOfWork.Appointments.FindAllAsync(a => a.DoctorId == doctor.Id);
+        var patient = await _unitOfWork.Patients.FindAsync(a => a.Id == Patientid || a.Name == name);
+        var appointments = await _unitOfWork.Appointments.FindAllAsync(a => a.PatientId == patient.Id);
         if (appointments == null || !appointments.Any())
         {
             return NotFound($"No appointments found for Doctor with Id {Patientid}");
@@ -195,8 +324,9 @@ public class AppointmentController : APIBaseController
         return Ok(appointments);
     }
 
-
-    [HttpGet("byDateRange")]
+    //Not Using
+    [HttpGet("GetAppointmentsByDateRange")]
+    [Authorize(Roles = "1")]
     public async Task<IActionResult> GetAppointmentsByDateRange(DateTime startDate, DateTime endDate)
     {
         var appointments = await _unitOfWork.Appointments.FindAllAsync(a => a.AppointmentDate >= startDate && a.AppointmentDate <= endDate);
@@ -208,16 +338,22 @@ public class AppointmentController : APIBaseController
     }
 
 
-    [HttpGet("status/{id}")]
-    public async Task<IActionResult> GetAppointmentStatus(int id)
+    //Where will I use
+    [HttpPut("EditAppointmentStatus")]
+    public async Task<IActionResult> EditAppointmentStatus(int id)
     {
         var appointment = await _unitOfWork.Appointments.GetByIdAsync(id);
         if (appointment == null)
         {
             return NotFound("Appointment not found.");
         }
-        return Ok(appointment.Status);
+        appointment.Status = "Completed";
+        _unitOfWork.Appointments.Update(appointment);
+        _unitOfWork.Save();
+        return Ok("appointment Completed Successfully");
     }
+
+    //Like GetAppointmentsForPatient
     [HttpGet("history/patient/{patientId}")]
     public async Task<IActionResult> GetAppointmentHistoryByPatient(int patientId)
     {
@@ -225,16 +361,13 @@ public class AppointmentController : APIBaseController
         return Ok(history);
     }
 
+    //Like GetAppointmentsForDoctor
     [HttpGet("history/doctor/{doctorId}")]
     public async Task<IActionResult> GetAppointmentHistoryByDoctor(int doctorId)
     {
         var history = await _unitOfWork.Appointments.FindAllAsync(a => a.DoctorId == doctorId && (a.Status == "completed" || a.Status == "cancelled"));
         return Ok(history);
     }
-
-
-
-
 
 
 }

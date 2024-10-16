@@ -156,6 +156,8 @@ public class UserController : APIBaseController
         }
         return BadRequest($"ther are {ModelState.ErrorCount} errors");
     }
+
+
     [HttpPut("Update")]
     public IActionResult Update(int id)
     {

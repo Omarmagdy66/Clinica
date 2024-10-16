@@ -1,5 +1,6 @@
 ﻿using Dto;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 
@@ -12,13 +13,16 @@ public class ClinicController : APIBaseController
     public ClinicController(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
-    [HttpGet]
+
+
+    [HttpGet("GetAllClinics")]
     public async Task<IActionResult> GetAllClinics()
     {
-        //var Clinics = await _unitOfWork.Clinics.GetAllAsync();
         return Ok(await _unitOfWork.Clinics.GetAllAsync());
     }
-    [HttpGet("{id}")]
+
+
+    [HttpGet("GetClinicById")]
     public async Task<IActionResult> GetClinicById(int id)
     {
         var clinic = await _unitOfWork.Clinics.GetByIdAsync(id);
@@ -28,28 +32,69 @@ public class ClinicController : APIBaseController
         }
         return Ok(clinic);
     }
-    [HttpGet("GetClinicByCityId")]
-    public async Task<IActionResult> GetClinicByCityId(int CityId)
+
+
+    //[HttpGet("GetClinicByCityId")]
+    //public async Task<IActionResult> GetClinicByCityId(int CityId)
+    //{
+    //    var clinics = await _unitOfWork.Clinics.GetAllAsync();
+    //    var clinic = clinics.FirstOrDefault(x => x.CityId == CityId);
+    //    if (clinic == null)
+    //    {
+    //        return BadRequest($"there isn't clinic in the city with id {CityId}");
+    //    }
+    //    return Ok(clinic);
+    //}
+    //[HttpGet("GetClinicByCountryId")]
+    //public async Task<IActionResult> GetClinicByCountryId(int CountryId)
+    //{
+    //    var clinics = await _unitOfWork.Clinics.GetAllAsync();
+    //    var clinic = clinics.FirstOrDefault(x => x.CountryId == CountryId);
+    //    if (clinic == null)
+    //    {
+    //        return BadRequest($"there isn't clinic in the city with id {CountryId}");
+    //    }
+    //    return Ok(clinic);
+    //}
+
+
+    //Merge GetClinicByCityId & GetClinicByCountryId
+    [HttpGet("GetClinicByCountryIdandCityId")]
+    public async Task<IActionResult> GetClinicByCountryIdandCityId(int? CountryId, int? CityId)
     {
         var clinics = await _unitOfWork.Clinics.GetAllAsync();
-        var clinic = clinics.FirstOrDefault(x => x.CityId == CityId);
-        if (clinic == null)
+        if(CityId!=null && CountryId!=null)
         {
-            return BadRequest($"there isn't clinic in the city with id {CityId}");
-        }
+            var clinic = clinics.Select(x => x.CountryId == CountryId && x.CityId == CityId);
+            if (clinic == null)
+            {
+                return BadRequest($"there isn't clinic in the city with id {CountryId}");
+            }
         return Ok(clinic);
-    }
-    [HttpGet("GetClinicByCountryId")]
-    public async Task<IActionResult> GetClinicByCountryId(int CountryId)
-    {
-        var clinics = await _unitOfWork.Clinics.GetAllAsync();
-        var clinic = clinics.FirstOrDefault(x => x.CountryId == CountryId);
-        if (clinic == null)
+        }
+        else if(CountryId!=null)
         {
-            return BadRequest($"there isn't clinic in the city with id {CountryId}");
+            var clinic = clinics.FirstOrDefault(x => x.CountryId == CountryId);
+            if (clinic == null)
+            {
+                return BadRequest($"there isn't clinic in the city with id {CountryId}");
+            }
+            return Ok(clinic);
         }
-        return Ok(clinic);
+        else if (CityId != null)
+        {
+            var clinic = clinics.FirstOrDefault(x => x.CityId == CityId);
+            if (clinic == null)
+            {
+                return BadRequest($"there isn't clinic in the city with id {CityId}");
+            }
+            return Ok(clinic);
+        }
+        return Ok(clinics);
     }
+
+
+    
     [HttpGet("GetClinicBySpecialization")]
     public async Task<IActionResult> GetClinicBySpecialization(int specializationId)
     {

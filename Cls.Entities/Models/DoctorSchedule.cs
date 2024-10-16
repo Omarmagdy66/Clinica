@@ -11,5 +11,4 @@ public class DoctorSchedule
     public bool? Status { get; set; } // 0 booked   1 available
     public Doctor? Doctor { get; set; }
     public Clinic? Clinic { get; set; }
-
 }

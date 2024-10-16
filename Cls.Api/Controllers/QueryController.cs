@@ -1,9 +1,11 @@
 ﻿using DAL;
 using Dto;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using System.Security.Claims;
 
 namespace Controllers;
 
@@ -30,13 +32,26 @@ public class QueryController : APIBaseController
         return Ok(Query);
     }
     [HttpPost("Create")]
+    [Authorize (Roles = "2,3")]
     public async Task<IActionResult> Create(QueryDto Querydto)
     {
         if (ModelState.IsValid)
         {
+            // Extract patient ID from the token
+            var patientIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (patientIdClaim == null)
+            {
+                return Unauthorized("Patient ID not found in token.");
+            }
+
+            if (!int.TryParse(patientIdClaim, out int patientId))
+            {
+                return BadRequest("Invalid Patient ID in token.");
+            }
+
             var Query = new Query()
             {
-                PatientId = Querydto.PatientId,
+                PatientId = patientId,
                 UserId = Querydto.UserId,
                 QueryDate = Querydto.QueryDate,
                 QueryStatus = Querydto.QueryStatus,
@@ -84,12 +99,14 @@ public class QueryController : APIBaseController
     }
 
     [HttpGet("GetQueriesByStatus")]
+    [Authorize(Roles = "1")]
     public async Task<IActionResult> GetQueriesByStatus(string status)
     {
         var queries = await _unitOfWork.Queries.FindAllAsync(q => q.QueryStatus == status);
         return Ok(queries);
     }
     [HttpPut("ResolveQuery")]
+    [Authorize(Roles = "1")]
     public async Task<IActionResult> ResolveQuery(int id)
     {
         var query = await _unitOfWork.Queries.GetByIdAsync(id);

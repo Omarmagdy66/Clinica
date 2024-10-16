@@ -1,6 +1,7 @@
 ﻿using Controllers;
 using Dto;
 using Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
@@ -14,12 +15,18 @@ namespace Cls.Api.Controllers
         public CitesController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
+
+
         [HttpGet("GetAllCites")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> GetAllCites()
         {
             return Ok(await _unitOfWork.Cities.GetAllAsync());
         }
+
+
         [HttpGet("GetCityById")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> GetCityById(int id)
         {
             var City = await _unitOfWork.Cities.GetByIdAsync(id);
@@ -29,7 +36,10 @@ namespace Cls.Api.Controllers
             }
             return Ok(City);
         }
-        [HttpPost]
+
+
+        [HttpPost("AddCity")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> AddCity(CityDto citydto)
         {
             if (ModelState.IsValid)
@@ -46,7 +56,10 @@ namespace Cls.Api.Controllers
             }
             return BadRequest($"ther are {ModelState.ErrorCount} errors");
         }
-        [HttpPut("{id}")]
+
+
+        [HttpPut("EditCity")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> EditCity(int id, [FromBody] CityDto citydto)
         {
             var City = await _unitOfWork.Cities.GetByIdAsync(id);
@@ -65,7 +78,9 @@ namespace Cls.Api.Controllers
             return BadRequest($"There are {ModelState.ErrorCount}");
         }
 
-        [HttpDelete("{id}")]
+
+        [HttpDelete("DeleteCity")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> DeleteCity(int id)
         {
             var City = await _unitOfWork.Cities.GetByIdAsync(id);
