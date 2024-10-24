@@ -34,6 +34,7 @@ public partial class clinicdbContext : DbContext
     public virtual DbSet<NurseAdminRequest> NusreAdminRequests { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<NurseNotification> NurseNotifications { get; set; }
+    public virtual DbSet<ApplyDoctorRequest> ApplyDoctorRequests { get; set; }
 
 
 

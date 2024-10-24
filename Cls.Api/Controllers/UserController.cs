@@ -37,12 +37,32 @@ public class UserController : APIBaseController
         if (User == null) return BadRequest("Invalid Id");
         return Ok(User);
     }
+
+    [HttpPut("EditPassword")]
+    public async Task<IActionResult> EditPassword(int id, UserDto userDto)
+    {
+        var user = await _unitOfWork.Users.GetByIdAsync(id);
+        var patient = await _unitOfWork.Patients.FindAsync(p => p.Email == user.Email);
+        if (user == null || patient == null)
+        {
+            return BadRequest("Invalid Id");
+        }
+        user.Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+        _unitOfWork.Users.Update(user);
+        _unitOfWork.Patients.Update(patient);
+        _unitOfWork.Save();
+        return Ok("Updated!");
+    }
+
+
     [HttpPost("PatientRegister")]
     public async Task<IActionResult> PatientRegister(PatientRegesterDto dto)
     {
         var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == dto.UserName || u.Email == dto.Email);
-        if (user1 != null)
-            return BadRequest("Username Or Email already Exist!");
+        if (user1.UserName == dto.UserName)
+            return BadRequest("Username already Exist!");
+        else if(user1.Email == dto.Email)
+            return BadRequest("Email already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
@@ -70,8 +90,10 @@ public class UserController : APIBaseController
     public async Task<IActionResult> CreateDoctorAsync(DoctorRegisterDto dto)
     {
         var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == dto.UserName || u.Email == dto.Email);
-        if (user1 != null)
-            return BadRequest("Username or Email already Exist!");
+        if (user1.UserName == dto.UserName)
+            return BadRequest("Username already Exist!");
+        else if (user1.Email == dto.Email)
+            return BadRequest("Email already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
@@ -207,7 +229,7 @@ public class UserController : APIBaseController
                     if (admin == null) return BadRequest("Admin not found");
                     return Ok(new
                     {
-                        token = jwt.GenerateJSONWebToken(admin, user.RoleId.ToString()),
+                        token = jwt.GenerateJSONWebToken(admin, user.RoleId.ToString(), role.RoleName),
                         expiration = DateTime.UtcNow.AddHours(1)
                     });
 
@@ -216,7 +238,7 @@ public class UserController : APIBaseController
                     if (patient == null) return BadRequest("Patient not found");
                     return Ok(new
                     {
-                        token = jwt.GenerateJSONWebToken(patient, user.RoleId.ToString()),
+                        token = jwt.GenerateJSONWebToken(patient, user.RoleId.ToString(), role.RoleName),
                         expiration = DateTime.UtcNow.AddHours(1)
                     });
 
@@ -225,7 +247,7 @@ public class UserController : APIBaseController
                     if (doctor == null) return BadRequest("Doctor not found");
                     return Ok(new
                     {
-                        token = jwt.GenerateJSONWebToken(doctor, user.RoleId.ToString()),
+                        token = jwt.GenerateJSONWebToken(doctor, user.RoleId.ToString(), role.RoleName),
                         expiration = DateTime.UtcNow.AddHours(1)
                     });
 
@@ -234,7 +256,7 @@ public class UserController : APIBaseController
                     if (nurse == null) return BadRequest("Nurse not found");
                     return Ok(new
                     {
-                        token = jwt.GenerateJSONWebToken(nurse, user.RoleId.ToString()),
+                        token = jwt.GenerateJSONWebToken(nurse, user.RoleId.ToString(), role.RoleName),
                         expiration = DateTime.UtcNow.AddHours(1)
                     });
 

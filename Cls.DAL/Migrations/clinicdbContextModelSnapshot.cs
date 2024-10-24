@@ -45,6 +45,47 @@ namespace Cls.DAL.Migrations
                     b.ToTable("Admins");
                 });
 
+            modelBuilder.Entity("Models.ApplyDoctorRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Examinationduration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("SpecializationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("SpecializationId");
+
+                    b.ToTable("ApplyDoctorRequests");
+                });
+
             modelBuilder.Entity("Models.Appointment", b =>
                 {
                     b.Property<int>("Id")
@@ -53,10 +94,10 @@ namespace Cls.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly>("AppointmentDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("AppointmentDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<int>("DoctorId")
+                    b.Property<int?>("DoctorId")
                         .HasColumnType("int");
 
                     b.Property<string>("PatientEmailIN")
@@ -77,7 +118,7 @@ namespace Cls.DAL.Migrations
                     b.Property<bool?>("Teleconsultation")
                         .HasColumnType("bit");
 
-                    b.Property<TimeSpan>("TimeSlot")
+                    b.Property<TimeOnly?>("TimeSlot")
                         .HasColumnType("time");
 
                     b.HasKey("Id");
@@ -233,7 +274,7 @@ namespace Cls.DAL.Migrations
                     b.Property<double?>("Price")
                         .HasColumnType("float");
 
-                    b.Property<int>("SpecializationId")
+                    b.Property<int?>("SpecializationId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -266,17 +307,17 @@ namespace Cls.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"));
 
-                    b.Property<TimeSpan?>("AvailableFrom")
+                    b.Property<TimeOnly?>("AvailableFrom")
                         .HasColumnType("time");
 
-                    b.Property<TimeSpan?>("AvailableTo")
+                    b.Property<TimeOnly?>("AvailableTo")
                         .HasColumnType("time");
 
                     b.Property<int?>("ClinicId")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly?>("Day")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("Day")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("DoctorId")
                         .HasColumnType("int");
@@ -455,11 +496,11 @@ namespace Cls.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("QueryDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("QueryDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("QueryStatus")
                         .HasColumnType("nvarchar(max)");
@@ -467,14 +508,7 @@ namespace Cls.DAL.Migrations
                     b.Property<string>("QueryText")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("PatientId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Queries");
                 });
@@ -554,14 +588,14 @@ namespace Cls.DAL.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -607,13 +641,28 @@ namespace Cls.DAL.Migrations
                     b.ToTable("AdminRequests");
                 });
 
-            modelBuilder.Entity("Models.Appointment", b =>
+            modelBuilder.Entity("Models.ApplyDoctorRequest", b =>
                 {
                     b.HasOne("Models.Doctor", "Doctor")
                         .WithMany()
                         .HasForeignKey("DoctorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Models.Specialization", "Specialization")
+                        .WithMany()
+                        .HasForeignKey("SpecializationId");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Specialization");
+                });
+
+            modelBuilder.Entity("Models.Appointment", b =>
+                {
+                    b.HasOne("Models.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId");
 
                     b.HasOne("Models.Patient", "Patient")
                         .WithMany()
@@ -671,9 +720,7 @@ namespace Cls.DAL.Migrations
                 {
                     b.HasOne("Models.Specialization", "specialization")
                         .WithMany()
-                        .HasForeignKey("SpecializationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SpecializationId");
 
                     b.Navigation("specialization");
                 });
@@ -760,25 +807,6 @@ namespace Cls.DAL.Migrations
                         .HasForeignKey("Nurseid");
 
                     b.Navigation("Nurse");
-                });
-
-            modelBuilder.Entity("Models.Query", b =>
-                {
-                    b.HasOne("Models.Patient", "Patient")
-                        .WithMany()
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Patient");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.Review", b =>

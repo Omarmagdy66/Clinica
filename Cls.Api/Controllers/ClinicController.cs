@@ -33,6 +33,60 @@ public class ClinicController : APIBaseController
         return Ok(clinic);
     }
 
+    [HttpGet("GetClinicByDoctor")]
+    public async Task<IActionResult> GetClinicByDoctor(int? doctorId)
+    {
+        var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+        if (doctorIdClaim == null)
+        {
+            var clinics = await _unitOfWork.Clinics.FindAllAsync(clinic => clinic.DoctorCLinics.Any(doctor => doctor.DoctorId == doctorId));
+
+            if (!clinics.Any())
+            {
+                return NotFound("No clinics found that have the provided doctor");
+            }
+            return Ok(clinics);
+        }
+
+        // Parse the DoctorId
+        if (!int.TryParse(doctorIdClaim, out int docId))
+        {
+            return BadRequest("Invalid Doctor ID in token.");
+        }
+        var doctor = await _unitOfWork.Doctors.GetByIdAsync(docId);
+        var user = await _unitOfWork.Users.FindAsync(o => o.Email == doctor.Email);
+        if(user.RoleId == 3 && user != null) {
+            var clinics = await _unitOfWork.Clinics.FindAllAsync(clinic => clinic.DoctorCLinics.Any(doctor => doctor.DoctorId == docId));
+
+            if (!clinics.Any())
+            {
+                return NotFound("No clinics found that have the provided doctor");
+            }
+            return Ok(clinics);
+        }
+        else
+        {
+            var clinics = await _unitOfWork.Clinics.FindAllAsync(clinic => clinic.DoctorCLinics.Any(doctor => doctor.DoctorId == doctorId));
+
+            if (!clinics.Any())
+            {
+                return NotFound("No clinics found that have the provided doctor");
+            }
+            return Ok(clinics);
+            
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 
     //[HttpGet("GetClinicByCityId")]
     //public async Task<IActionResult> GetClinicByCityId(int CityId)
@@ -94,7 +148,6 @@ public class ClinicController : APIBaseController
     }
 
 
-    
     [HttpGet("GetClinicBySpecialization")]
     public async Task<IActionResult> GetClinicBySpecialization(int specializationId)
     {
@@ -103,17 +156,6 @@ public class ClinicController : APIBaseController
         if (!clinics.Any())
         {
             return NotFound("No clinics found offering this specialization.");
-        }
-        return Ok(clinics);
-    }
-    [HttpGet("GetClinicByDoctor")]
-    public async Task<IActionResult> GetClinicByDoctor(int doctorId)
-    {
-        var clinics = await _unitOfWork.Clinics.FindAllAsync(clinic => clinic.DoctorCLinics.Any(doctor => doctor.DoctorId == doctorId));
-
-        if (!clinics.Any())
-        {
-            return NotFound("No clinics found that have the provided doctor");
         }
         return Ok(clinics);
     }

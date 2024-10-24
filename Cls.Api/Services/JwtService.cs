@@ -16,26 +16,29 @@ namespace Services
         {
             this._config = configuration;
         }
-        
-        public string GenerateJSONWebToken<T>(T user, string role) where T : class
+
+        public string GenerateJSONWebToken<T>(T user, string roleId, string roleName) where T : class
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             List<Claim> userClaims = new List<Claim>();
 
-            // Assuming the user class has an Id and UserName properties, we can access them dynamically.
-            // You may need to adapt this based on your actual implementation of Admin, Patient, Doctor, etc.
+            // Access user properties dynamically
             var userIdProperty = typeof(T).GetProperty("Id");
             var userNameProperty = typeof(T).GetProperty("Name");
 
             if (userIdProperty != null && userNameProperty != null)
             {
-                userClaims.Add(new Claim(ClaimTypes.NameIdentifier, userIdProperty.GetValue(user).ToString()));
-                userClaims.Add(new Claim(ClaimTypes.Name, userNameProperty.GetValue(user).ToString()));
+                userClaims.Add(new Claim("id", userIdProperty.GetValue(user).ToString())); // Custom claim for ID
+                userClaims.Add(new Claim("name", userNameProperty.GetValue(user).ToString())); // Custom claim for Name
             }
 
-            userClaims.Add(new Claim(ClaimTypes.Role, role));
+            // Add role ID and role name as claims
+            userClaims.Add(new Claim("roleid", roleId)); // Custom claim for RoleId
+            userClaims.Add(new Claim("role", roleName)); // Custom claim for RoleName
+            userClaims.Add(new Claim(ClaimTypes.Role, roleId));
+
             userClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
 
             var token = new JwtSecurityToken(
@@ -47,5 +50,44 @@ namespace Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        //public string GenerateJSONWebToken<T>(T user, string roleId, string roleName) where T : class
+        //{
+        //    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        //    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        //    List<Claim> userClaims = new List<Claim>();
+
+        //    var userIdProperty = typeof(T).GetProperty("Id");
+        //    var userNameProperty = typeof(T).GetProperty("Name");
+
+        //    if (userIdProperty != null && userNameProperty != null)
+        //    {
+        //        userClaims.Add(new Claim("id", userIdProperty.GetValue(user).ToString())); // Custom claim for ID
+        //        userClaims.Add(new Claim("name", userNameProperty.GetValue(user).ToString())); // Custom claim for Name
+        //    }
+
+        //    // Add roleid and rolename as claims
+        //    userClaims.Add(new Claim("roleid", roleId));
+        //    userClaims.Add(new Claim("rolename", roleName));
+
+        //    // Add ClaimTypes.Role claim to map it with "Roles" authorization
+        //    userClaims.Add(new Claim(ClaimTypes.Role, roleId)); // Using roleId as the role
+
+        //    userClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+
+        //    var token = new JwtSecurityToken(
+        //        issuer: _config["Jwt:Issuer"],
+        //        audience: _config["Jwt:Audience"],
+        //        claims: userClaims,
+        //        expires: DateTime.Now.AddMinutes(120),
+        //        signingCredentials: credentials);
+
+        //    return new JwtSecurityTokenHandler().WriteToken(token);
+        //}
+
+
+
+
     }
 }

@@ -12,7 +12,7 @@ public class ReviewController : APIBaseController
     public ReviewController(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
-    [HttpGet]
+    [HttpGet("GetAllReviews")]
     public async Task<IActionResult> GetAllReviews()
     {
         return Ok(await _unitOfWork.Reviews.GetAllAsync());
@@ -30,19 +30,32 @@ public class ReviewController : APIBaseController
     [HttpPost("AddReview")]
     public async Task<IActionResult> AddReview(ReviewDto reviewdto)
     {
+        var patientIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+        if (patientIdClaim == null)
+        {
+            return Unauthorized("Patient ID not found in token.");
+        }
+
+        // Parse the patient ID
+        int patientId;
+        if (!int.TryParse(patientIdClaim, out patientId))
+        {
+            return BadRequest("Invalid Patient ID in token.");
+        }
+
         if (ModelState.IsValid)
         {
-            //var hasReviewed = _unitOfWork.Reviews.IsExist(r => r.PatientId == reviewdto.PatientId && r.DoctorId == reviewdto.DoctorId);
 
             var appointment = await _unitOfWork.Appointments.FindAsync(a =>
-            a.PatientId == reviewdto.PatientId &&
+            a.PatientId == patientId &&
             a.DoctorId == reviewdto.DoctorId &&
-            a.Status == "completed");
+            a.Status == "Completed");
             if (appointment != null)
             {
                 var Review = new Review()
                 {
-                    PatientId = reviewdto.PatientId,
+                    PatientId = patientId,
                     DoctorId = reviewdto.DoctorId,
                     Rating = reviewdto.Rating,
                     ReviewText = reviewdto.ReviewText,
@@ -93,25 +106,73 @@ public class ReviewController : APIBaseController
 
     //how
     [HttpGet("GetReviewsForDoctor")]
-    public async Task<IActionResult> GetReviewsForDoctor(int doctorId)
+    public async Task<IActionResult> GetReviewsForDoctor(int? doctorId)
     {
-        var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.DoctorId == doctorId);
-        return Ok(reviews);
+        var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+        if (doctorIdClaim == null)
+        {
+            return Unauthorized("Doctor ID not found in token.");
+        }
+
+        // Parse the DoctorId
+        if (!int.TryParse(doctorIdClaim, out int docId))
+        {
+            return BadRequest("Invalid Doctor ID in token.");
+        }
+        var doctor = await _unitOfWork.Doctors.GetByIdAsync(docId);
+        var user = await _unitOfWork.Users.FindAsync(o => o.Email == doctor.Email);
+        if (user.RoleId == 1)
+        {
+            var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.DoctorId == doctorId);
+            return Ok(reviews);
+        }else
+        {
+            var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.DoctorId == docId);
+            return Ok(reviews);
+        }
     }
+
+
     [HttpGet("GetAverageRatingForDoctor")]
-    public async Task<IActionResult> GetAverageRatingForDoctor(int doctorId)
+    public async Task<IActionResult> GetAverageRatingForDoctor(int? doctorId)
     {
-        var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.DoctorId == doctorId);
-        var averageRating = reviews.Average(r => r.Rating);
-        return Ok(new { averageRating });
+        var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+        if (doctorIdClaim == null)
+        {
+            return Unauthorized("Doctor ID not found in token.");
+        }
+
+        // Parse the DoctorId
+        if (!int.TryParse(doctorIdClaim, out int docId))
+        {
+            var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.DoctorId == doctorId);
+            var averageRating = reviews.Average(r => r.Rating);
+            return Ok(new { averageRating });
+        }
+        var doctor = await _unitOfWork.Doctors.GetByIdAsync(docId);
+        var user = await _unitOfWork.Users.FindAsync(o => o.Email == doctor.Email);
+        if (user.RoleId == 3)
+        {
+            var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.DoctorId == docId);
+            var averageRating = reviews.Average(r => r.Rating);
+            return Ok(new { averageRating });
+        }
+        else
+        {
+            var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.DoctorId == doctorId);
+            var averageRating = reviews.Average(r => r.Rating);
+            return Ok(new { averageRating });
+        }
     }
     //what is benefit?
-    [HttpGet("GetReviewsForUser")]
-    public async Task<IActionResult> GetReviewsForUser(int patientId)
-    {
-        var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.PatientId == patientId);
-        return Ok(reviews);
-    }
+    //[HttpGet("GetReviewsForUser")]
+    //public async Task<IActionResult> GetReviewsForUser(int patientId)
+    //{
+    //    var reviews = await _unitOfWork.Reviews.FindAllAsync(r => r.PatientId == patientId);
+    //    return Ok(reviews);
+    //}
 
 
     //[HttpPost("FlagReview")]

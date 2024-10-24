@@ -18,7 +18,6 @@ namespace Cls.Api.Controllers
 
 
         [HttpGet("GetAllCountries")]
-        [Authorize(Roles = "1")]
         public async Task<IActionResult> GetAllCountries()
         {
             return Ok(await _unitOfWork.Countries.GetAllAsync());
@@ -26,7 +25,6 @@ namespace Cls.Api.Controllers
 
 
         [HttpGet("GetCountryById")]
-        [Authorize(Roles = "1")]
         public async Task<IActionResult> GetCountryById(int id)
         {
             var country = await _unitOfWork.Countries.GetByIdAsync(id);

@@ -33,6 +33,7 @@ namespace Interfaces
         public IRepository<NurseAdminRequest> NurseAdminRequests { get; }
         public IRepository<Notification> Notifications { get; }
         public IRepository<NurseNotification> NurseNotifications { get; }
+        public IRepository<ApplyDoctorRequest> ApplyDoctorRequests { get; }
 
 
 

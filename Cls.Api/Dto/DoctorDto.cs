@@ -5,7 +5,7 @@ namespace Dto;
 
 public class DoctorDto
 {
-    public int SpecializationId { get; set; }
+    public int? SpecializationId { get; set; }
     public int? Examinationduration { get; set; }
     public string? Name { get; set; }
     public string? Email { get; set; }

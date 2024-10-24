@@ -1,5 +1,5 @@
 
-using Data;
+global using Data;
 using Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +7,8 @@ using DAL;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Microsoft.Extensions.Options;
-
+using Services;
+using SimpleEmailApp.Services.EmailService;
 
 namespace Cls.Api
 {
@@ -117,6 +117,7 @@ namespace Cls.Api
                 });
 
             });
+            builder.Services.AddScoped<IEmailService, EmailService>();
             var app = builder.Build();
             app.UseCors("MyPolicy");
 

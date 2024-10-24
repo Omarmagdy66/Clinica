@@ -35,6 +35,7 @@ namespace DAL
             DoctorClinics = new Repository<DoctorCLinic>(_context);
             Notifications = new Repository<Notification>(_context);
             NurseNotifications = new Repository<NurseNotification>(_context);
+            ApplyDoctorRequests = new Repository<ApplyDoctorRequest>(_context);
 
         }
         public IRepository<User> Users { get; }
@@ -57,6 +58,7 @@ namespace DAL
         public IRepository<Notification> Notifications { get; }
         public IRepository<NurseNotification> NurseNotifications { get; }
         public IRepository<NurseAdminRequest> NurseAdminRequests { get; }
+        public IRepository<ApplyDoctorRequest> ApplyDoctorRequests { get; }
         public void Dispose()
         {
             _context.Dispose();

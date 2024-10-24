@@ -44,7 +44,7 @@ public class DoctorScheduleController : APIBaseController
         if (ModelState.IsValid)
         {
             // Extract DoctorId from token
-            var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
             if (doctorIdClaim == null)
             {
                 return Unauthorized("Doctor ID not found in token.");
@@ -128,7 +128,6 @@ public class DoctorScheduleController : APIBaseController
 
 
 
-
     //[HttpPut("EditDoctorSchedule")]
     //public async Task<IActionResult> EditDoctorSchedule(int id, [FromBody] DoctorScheduleDto scheduledto)
     //{
@@ -180,24 +179,30 @@ public class DoctorScheduleController : APIBaseController
 
 
     [HttpGet("GetSchedulesByDoctorId")]
+
     public async Task<IActionResult> GetSchedulesByDoctorId(int? idDoctor)
     {
-        var Role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (Role == null)
-        {
-            return Unauthorized("Doctor ID not found in token.");
-        }
-
+        var Role = User.Claims.FirstOrDefault(c => c.Type == "roleid")?.Value;
         // Parse the DoctorId
         int RoleId;
         if (!int.TryParse(Role, out RoleId))
         {
-            return BadRequest("Invalid Doctor ID in token.");
+            // Fetch doctor's schedules from the database
+            var schedules = await _unitOfWork.Schedules.FindAllAsync(s => s.DoctorId == idDoctor);
+
+            // If no schedules are found, return NotFound status
+            if (schedules == null || !schedules.Any())
+            {
+                return NotFound($"No schedules found for Doctor with Id {idDoctor}");
+            }
+
+            // Return the schedules with OK status
+            return Ok(schedules);
         }
+
         if(RoleId == 3) {
         // Extract DoctorId from token
-        if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out int doctorId))
+        if (!int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "id")?.Value, out int doctorId))
         {
             return Unauthorized("Doctor ID not found or invalid in token.");
         }
@@ -291,10 +296,5 @@ public class DoctorScheduleController : APIBaseController
         }
         return Ok(schedules);
     }
-
-
-
-
-
 
 }

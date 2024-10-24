@@ -1,0 +1,41 @@
+.search-page {
+    /* Add styles for the page container */
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+
+  }
+  .cont-big{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .search-options {
+    /* Style the dropdowns container */
+    display: flex;  /* Place dropdowns in a row */
+    gap: 20px;     /* Add space between dropdowns */
+    margin-bottom: 20px;
+  }
+  .con-inn{
+    margin: 0px 14px;
+  }
+  .search-options > div {
+    /* Style individual dropdown containers */
+    flex: 1;  /* Distribute available space equally */
+  }
+  
+.searchResults{
+
+width: 90%;
+margin: 10px auto;
+
+}
+ 
+  .search-result-item {
+    /* Style individual search result items */
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    /* ... */
+  }

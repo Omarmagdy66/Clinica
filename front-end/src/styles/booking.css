@@ -1,0 +1,51 @@
+/* ... other styles ... */
+
+.schedules {
+    /* Container for the schedules */
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to multiple lines */
+    gap: 10px;
+    width: 90%;
+    padding: 10px 0px;
+  }
+  .show-shedules{
+    display: flex;
+    width: 90%;
+    flex-wrap: wrap;
+    gap: 10px;
+
+  }
+  .schedule-item.disabled {
+    /* Style for disabled appointments */
+    opacity: 0.5; /* Make it semi-transparent */
+    cursor: not-allowed; /* Show a "not-allowed" cursor */
+    background-color: #f5f5f5; /* Light gray background */
+    pointer-events: none; /* Prevent clicking on disabled items */
+  }
+
+  .top-schedules{
+    display: flex;
+    width: 90%;
+    justify-content: space-between;
+  }
+  .schedule-item {
+    /* Style for each schedule item */
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer; 
+    flex: 0 0 calc(33.33% - 20px); /* 3 items per row with spacing */
+    box-sizing: border-box; /* Include padding and border in width calculation */
+    text-align: center; 
+  }
+  
+  .schedule-item.selected {
+    /* Highlight the selected schedule */
+    background-color: #e0f2f7; /* Light blue background */
+    border-color: #00bcd4; /* Matching border color */
+  }
+  
+  .schedule-item:hover {
+    /* Add a hover effect */
+    background-color: #f5f5f5; 
+  }

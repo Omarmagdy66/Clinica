@@ -18,7 +18,7 @@ namespace Cls.Api.Controllers
 
 
         [HttpGet("GetAllCites")]
-        [Authorize(Roles = "1")]
+
         public async Task<IActionResult> GetAllCites()
         {
             return Ok(await _unitOfWork.Cities.GetAllAsync());
@@ -26,10 +26,22 @@ namespace Cls.Api.Controllers
 
 
         [HttpGet("GetCityById")]
-        [Authorize(Roles = "1")]
+
         public async Task<IActionResult> GetCityById(int id)
         {
             var City = await _unitOfWork.Cities.GetByIdAsync(id);
+            if (City == null)
+            {
+                return BadRequest("Invalid Id");
+            }
+            return Ok(City);
+        }
+
+        [HttpGet("GetCityByCountryId")]
+
+        public async Task<IActionResult> GetCityByCountryId(int countryid)
+        {
+            var City = await _unitOfWork.Cities.FindAllAsync(c=>c.CountryId == countryid);
             if (City == null)
             {
                 return BadRequest("Invalid Id");

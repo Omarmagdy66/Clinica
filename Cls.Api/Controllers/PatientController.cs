@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace Controllers;
 
@@ -22,6 +23,8 @@ public class PatientController : APIBaseController
     {
         return Ok(await _unitOfWork.Patients.GetAllAsync());
     }
+
+
     [HttpGet("GetPatientById")]
     public async Task<IActionResult> GetPatientById(int id)
     {
@@ -32,6 +35,8 @@ public class PatientController : APIBaseController
         }
         return Ok(patient);
     }
+
+
     [HttpPost("AddPatient")]
     [Authorize(Roles = "1")]
     public async Task<IActionResult> AddPatient(PatientDto patientdto)
@@ -62,34 +67,100 @@ public class PatientController : APIBaseController
         }
         return BadRequest($"ther are {ModelState.ErrorCount} errors");
     }
-    [HttpPut("{id}")]
-    public async Task<IActionResult> EditPatient(int id, [FromBody] PatientDto patientdto)
+
+
+    [HttpPut("EditPatient")]
+    [Authorize(Roles = "1,2")]
+    public async Task<IActionResult> EditPatient([FromBody] PatientDto patientdto)
     {
-        var patient = await _unitOfWork.Patients.GetByIdAsync(id);
+        // Get the patient ID from the token claims
+        var patientIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
+
+        if (patientIdClaim == null)
+        {
+            return Unauthorized("Patient ID not found in token.");
+        }
+
+        // Parse the patient ID
+        int patientId;
+        if (!int.TryParse(patientIdClaim, out patientId))
+        {
+            return BadRequest("Invalid Patient ID in token.");
+        }
+
+        // Fetch the patient from the database
+        var patient = await _unitOfWork.Patients.GetByIdAsync(patientId);
+        var user = await _unitOfWork.Users.FindAsync(u=>u.Email == patient.Email);
+
         if (patient == null)
         {
             return BadRequest("Invalid Id");
         }
+
         if (ModelState.IsValid)
         {
-            patient.Name = patientdto.Name;
-            patient.Email = patientdto.Email;
-            patient.Birthday = patientdto.Birthday;
-            patient.Gender = patientdto.Gender;
-            patient.Password = patientdto.Password;
-            patient.PhoneNumber = patientdto.PhoneNumber;
-            patient.RegistrationDate = patientdto.RegistrationDate;
+            // Update only the fields that have been provided in the DTO
+            if (!string.IsNullOrEmpty(patientdto.Name))
+            {
+                var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == patientdto.Name);
+                if (user1 != null)
+                    return BadRequest("Name already Exist!");
+                patient.Name = patientdto.Name;
+                user.UserName = patientdto.Name;
+            }
+
+            if (!string.IsNullOrEmpty(patientdto.Email))
+            {
+                var user1 = await _unitOfWork.Users.FindAsync(u => u.Email == patientdto.Email);
+                if (user1 !=null)
+                    return BadRequest("Email already Exist!");
+                patient.Email = patientdto.Email;
+                user.Email = patientdto.Email;
+            }
+
+            if (patientdto.Birthday.HasValue)
+            {
+                patient.Birthday = patientdto.Birthday.Value;
+            }
+
+            if (!string.IsNullOrEmpty(patientdto.Gender))
+            {
+                patient.Gender = patientdto.Gender;
+            }
+
+            if (!string.IsNullOrEmpty(patientdto.Password))
+            {
+                patient.Password = BCrypt.Net.BCrypt.HashPassword(patientdto.Password);
+                user.Password = BCrypt.Net.BCrypt.HashPassword(patientdto.Password);
+            }
+
+            if (!string.IsNullOrEmpty(patientdto.PhoneNumber))
+            {
+                patient.PhoneNumber = patientdto.PhoneNumber;
+            }
+
+            if (patientdto.RegistrationDate.HasValue)
+            {
+                patient.RegistrationDate = patientdto.RegistrationDate.Value;
+            }
+
+            // Update the patient entity in the database
             _unitOfWork.Patients.Update(patient);
+            _unitOfWork.Users.Update(user);
             _unitOfWork.Save();
+
             return Ok("Updated!");
         }
-        return BadRequest($"There are {ModelState.ErrorCount}");
+
+        return BadRequest($"There are {ModelState.ErrorCount} errors in the model.");
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePatient(int id)
+
+    [HttpDelete("DeletePatient")]
+    [Authorize(Roles = "1")]
+    public async Task<IActionResult> DeletePatient(int patientId)
     {
-        var patient = await _unitOfWork.Patients.GetByIdAsync(id);
+        var patient = await _unitOfWork.Patients.GetByIdAsync(patientId);
         if (patient == null)
         {
             return BadRequest("Invalid Id");

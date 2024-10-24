@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Services;
+using SimpleEmailApp.Services.EmailService;
+using System.Numerics;
 using System.Security.Claims;
 
 namespace Controllers;
@@ -13,8 +16,10 @@ namespace Controllers;
 [ApiController]
 public class QueryController : APIBaseController
 {
-    public QueryController(IUnitOfWork unitOfWork) : base(unitOfWork)
+    private readonly IEmailService _emailService;
+    public QueryController(IUnitOfWork unitOfWork, IEmailService emailService) : base(unitOfWork)
     {
+        _emailService = emailService;
     }
     [HttpGet("GetAll")]
     public async Task<IActionResult> GetAll()
@@ -32,37 +37,37 @@ public class QueryController : APIBaseController
         return Ok(Query);
     }
     [HttpPost("Create")]
-    [Authorize (Roles = "2,3")]
     public async Task<IActionResult> Create(QueryDto Querydto)
     {
-        if (ModelState.IsValid)
-        {
-            // Extract patient ID from the token
-            var patientIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (patientIdClaim == null)
-            {
-                return Unauthorized("Patient ID not found in token.");
-            }
-
-            if (!int.TryParse(patientIdClaim, out int patientId))
-            {
-                return BadRequest("Invalid Patient ID in token.");
-            }
 
             var Query = new Query()
             {
-                PatientId = patientId,
-                UserId = Querydto.UserId,
-                QueryDate = Querydto.QueryDate,
-                QueryStatus = Querydto.QueryStatus,
+                Name = Querydto.Name,
+                Email = Querydto.Email,
                 QueryText = Querydto.QueryText,
+                QueryDate = DateTime.Now.Date,
+                QueryStatus = "Pending",
             };
             await _unitOfWork.Queries.AddAsync(Query);
             _unitOfWork.Save();
+        try
+        {
+            var Email = new EmailDto()
+            {
+                Subject = "We Value Your Feedback on Clinica!",
+                Body = $"Dear {Querydto.Name},<br><br>Thank you for using Clinica for your healthcare needs. We are constantly striving to improve our platform, and your opinion matters to us!<br><br>We would appreciate it if you could take a moment to share your feedback about your experience using our site.<br><br>Please click the link below to provide your feedback:<br><a href='[Feedback Link]'>Share Your Feedback</a><br><br>Thank you for helping us enhance our services.<br><br>Best regards,<br>CLINICA Team",
+                To = Querydto.Email
+            };
+            _emailService.SendEmail(Email);
             return Ok("Created!");
         }
-        return BadRequest($"ther are {ModelState.ErrorCount} errors");
+        catch (Exception ex)
+        {
+            return Ok("Created!");
+        }
     }
+
+
     [HttpPut("UpdateById")]
     public async Task<IActionResult> Update(int id, [FromBody] QueryDto Querydto)
     {
@@ -73,10 +78,8 @@ public class QueryController : APIBaseController
         }
         if (ModelState.IsValid)
         {
-            Query.PatientId = Querydto.PatientId;
-            Query.UserId = Querydto.UserId;
-            Query.QueryDate = Querydto.QueryDate;
-            Query.QueryStatus = Querydto.QueryStatus;
+            Query.Name = Querydto.Name;
+            Query.Email = Querydto.Email;
             Query.QueryText = Querydto.QueryText;
             _unitOfWork.Queries.Update(Query);
             _unitOfWork.Save();
@@ -105,19 +108,36 @@ public class QueryController : APIBaseController
         var queries = await _unitOfWork.Queries.FindAllAsync(q => q.QueryStatus == status);
         return Ok(queries);
     }
-    [HttpPut("ResolveQuery")]
+
+
+    [HttpPut("SolveQuery")]
     [Authorize(Roles = "1")]
-    public async Task<IActionResult> ResolveQuery(int id)
+    public async Task<IActionResult> SolveQuery(int id)
     {
         var query = await _unitOfWork.Queries.GetByIdAsync(id);
         if (query == null)
             return NotFound();
 
-        query.QueryStatus = "resolved";
+        query.QueryStatus = "Solved";
         _unitOfWork.Queries.Update(query);
         _unitOfWork.Save();
+        try
+        {
+            var Email = new EmailDto()
+            {
+                Subject = "Your Issue Has Been Resolved",
+                Body = $"Dear {query.Name},<br><br>We are pleased to inform you that the issue you reported regarding Clinica has been successfully resolved.<br><br>Thank you for bringing this to our attention. If you experience any further problems or have any other questions, please don't hesitate to contact us.<br><br>We appreciate your feedback and your patience in helping us improve our platform.<br><br>Best regards,<br>Clinica Support Team",
+                To = query.Email
+            };
+            _emailService.SendEmail(Email);
+            return Ok("Query Solved");
+        }
+        catch (Exception ex)
+        {
+            return Ok("Query Solved");
+        }
 
-        return Ok(new { message = "Query resolved." });
+        
     }
 
 

@@ -6,7 +6,7 @@ namespace Models;
 public class Doctor
 {
     public int Id { get; set; }
-    public int SpecializationId { get; set; }
+    public int? SpecializationId { get; set; }
     public int? Examinationduration { get; set; }
     public string? Name { get; set; }
     public string? Email { get; set; }
