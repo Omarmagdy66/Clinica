@@ -111,7 +111,6 @@ public class QueryController : APIBaseController
 
 
     [HttpPut("SolveQuery")]
-    [Authorize(Roles = "1")]
     public async Task<IActionResult> SolveQuery(int id)
     {
         var query = await _unitOfWork.Queries.GetByIdAsync(id);

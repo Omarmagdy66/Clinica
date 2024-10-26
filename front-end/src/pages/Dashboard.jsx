@@ -7,6 +7,7 @@ import Users from "../components/Users";
 import Home from "../components/Home";
 import Aprofile from "../components/Aprofile";
 import GetAllRequestsApply from "../components/GetAllRequestsApply";
+import AdminQueries from "../components/AdminQueries";
 
 const Dashboard = (props) => {
   console.log(props);
@@ -27,6 +28,8 @@ const Dashboard = (props) => {
             <AdminDoctors />
           ) : type === "GetAllRequestsApply" ? (
             <GetAllRequestsApply />
+          ) :type === "GetAllQueries" ? (
+            <AdminQueries/>
           ) :type === "applications" ? (
             <AdminApplications />
           ) : type === "appointments" ? (

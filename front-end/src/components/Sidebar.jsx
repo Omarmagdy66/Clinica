@@ -38,6 +38,11 @@ const Sidebar = () => {
       path: "/dashboard/getAllRequestsApply",
       icon: <FaUserMd />,
     },
+    {
+      name: "All Queries",
+      path: "/dashboard/getAllQueries",
+      icon: <FaUserMd />,
+    },
     // {
     //   name: "Appointments",
     //   path: "/dashboard/appointments",

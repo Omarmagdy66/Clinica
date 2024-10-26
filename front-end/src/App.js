@@ -176,6 +176,14 @@ function App() {
             }
           />
           <Route
+            path="/dashboard/getAllQueries"
+            element={
+              <Admin>
+                <Dashboard type={"GetAllQueries"} />
+              </Admin>
+            }
+          />
+          <Route
             path="/dashboard/appointments"
             element={
               <Admin>

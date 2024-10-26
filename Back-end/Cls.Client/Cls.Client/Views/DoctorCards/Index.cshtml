@@ -1,0 +1,21 @@
+﻿@model IEnumerable<Models.Doctor>
+
+}
+<div class="doctor-details-container">
+    <h2 id="doctor-name">@Html.DisplayNameFor(model => model.Name)</h2>
+    <p id="doctor-specialty">@Html.DisplayNameFor(model => model.SpecializationId)</p>
+    <p id="doctor-qualification">@Html.DisplayNameFor(model => model.Bio)</p>
+    <p id="doctor-rating">@Html.DisplayNameFor(model => model.Price)</p>
+
+    <div class="appointment-section">
+        <h3>Select an Appointment</h3>
+        <select id="appointment-times">
+            <option value="" disabled selected>Select a time</option>
+            <option value="">@Html.DisplayNameFor(model => model.Email)</option>
+            <option value="11am">11:00 AM</option>
+            <!-- Add more times here -->
+        </select>
+
+        <button onclick="bookAppointment()">Book Appointment</button>
+    </div>
+</div>
