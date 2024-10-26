@@ -4,13 +4,12 @@ import '../styles/search.css';
 import Navbar from '../components/Navbar';
 import Empty from '../components/Empty';
 import "../styles/user.css";
-import "../styles/appointments.css"
+import "../styles/appointments.css";
 import Footer from '../components/Footer';
 import { FaClock, FaSearch } from 'react-icons/fa';
 import BookingPage from './BookingPage';
 
 function SearchPage() {
-
   const [searchResults, setSearchResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const PerPage = 4;
@@ -21,8 +20,9 @@ function SearchPage() {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [specializationNames, setSpecializationNames] = useState({});
-  const [showBooking, setShowBooking] = useState(false); // State to control the booking page visibility
-  const [selectedDoctor, setSelectedDoctor] = useState(null); // State to store the selected doctor's data
+  const [showBooking, setShowBooking] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
 
   useEffect(() => {
     const fetchSpecializations = async () => {
@@ -31,9 +31,9 @@ function SearchPage() {
         setSpecializations(response.data);
         console.log(response.data);
 
-        response.data.map((data) => {
-          getSpecialization(data.id)
-        })
+        response.data.forEach((data) => {
+          getSpecialization(data.id);
+        });
       } catch (error) {
         console.error('Error fetching specializations:', error);
       }
@@ -44,7 +44,6 @@ function SearchPage() {
         const response = await axios.get('Country/GetAllCountries');
         setCountries(response.data);
         console.log(response.data);
-
       } catch (error) {
         console.error('Error fetching countries:', error);
       }
@@ -63,7 +62,6 @@ function SearchPage() {
         const response = await axios.get(`/Cites/GetCityByCountryId?countryId=${countryId}`);
         setCities(response.data);
         console.log(response.data);
-
       } else {
         setCities([]);
       }
@@ -73,9 +71,7 @@ function SearchPage() {
   };
 
   const getSpecialization = async (id) => {
-    if (specializationNames[id]) {
-      return specializationNames[id];
-    }
+    if (specializationNames[id]) return specializationNames[id];
 
     try {
       const response = await axios.get(`/Specialization/${id}`);
@@ -92,36 +88,33 @@ function SearchPage() {
 
   const handleSearch = async () => {
     try {
-      // Construct the URL with query parameters
       const searchUrl = `http://clinica.runasp.net/api/Doctor/DoctorSearch?`;
       const queryParams = new URLSearchParams();
-      if (selectedSpecialization) {
-        queryParams.append('Specialization', selectedSpecialization);
-      }
-      if (selectedCountry) {
-        queryParams.append('Country', selectedCountry);
-      }
-      if (selectedCity) {
-        queryParams.append('city', selectedCity);
-      }
 
-      // Make the API call
+      if (selectedSpecialization) queryParams.append('Specialization', selectedSpecialization);
+      if (selectedCountry) queryParams.append('Country', selectedCountry);
+      if (selectedCity) queryParams.append('city', selectedCity);
+
       const response = await axios.get(searchUrl + queryParams.toString());
-      setSearchResults(response.data);
+
+      if (response.status === 200) {
+        setSearchResults(response.data);
+        setErrorMessage(''); // Clear error message on successful response
+      }
     } catch (error) {
       console.error('Error fetching search results:', error);
-      // Handle the error, e.g., show an error message to the user
+      if (error.response && error.response.status === 400) {
+        setErrorMessage('No doctors found for the selected criteria.'); // Set error message for Bad Request
+      } else {
+        setErrorMessage('An unexpected error occurred.'); // General error message
+      }
+      setSearchResults([]); // Clear results if there's an error
     }
-
-    console.log(searchResults);
-
   };
 
   const totalPages = Math.ceil(searchResults.length / PerPage);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const renderPagination = () => {
     const pages = [];
@@ -140,133 +133,133 @@ function SearchPage() {
     currentPage * PerPage
   );
 
-  const handleBookNow = async (doctor) => {
-    setSelectedDoctor(doctor); // Store the selected doctor's data
-    setShowBooking(true); // Show the BookingPage
+  const handleBookNow = (doctor) => {
+    setSelectedDoctor(doctor);
+    setShowBooking(true);
   };
 
   const handleCloseBooking = () => {
-    setShowBooking(false); // Hide the BookingPage
-    setSelectedDoctor(null); // Clear the selected doctor
+    setShowBooking(false);
+    setSelectedDoctor(null);
   };
 
-  return <>
-    <Navbar />
+  return (
+    <>
+      <Navbar />
 
-    <div className="search-page">
-      {/* Add a container for styling */}
-      <h1>Search</h1>
+      <div className="search-page">
+        <h1>Search</h1>
 
-      <div className='cont-big'>
-        <div className='con-inn'>
-          <label htmlFor="specialization">Specialization:</label>
-          <select
-            id="specialization"
-            value={selectedSpecialization}
-            onChange={(e) => setSelectedSpecialization(e.target.value)}
-          >
-            <option value="">All Specializations</option>
-
-            {specializations.map((spec) => (
-              <option key={spec.id} value={spec.id}>
-                {spec.specializationName}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className='con-inn'>
-          <label htmlFor="country">Country:</label>
-          <select
-            id="country"
-            value={selectedCountry}
-            onChange={handleCountryChange}
-          >
-            <option value="">All
-              Countries</option>
-            {countries.map((country) => (
-              <option key={country.id} value={country.id}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className='con-inn'>
-          <label htmlFor="city">City:</label>
-
-          <select
-            id="city"
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            disabled={!selectedCountry}
-          >
-            <option value="">All Cities</option>
-            {cities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button className='btn form-btn' onClick={handleSearch}>Search <FaSearch /></button>
-      </div>
-      <div className="container notif-section">
-        {searchResults.length > 0 ? (
-          <div className="appointments">
-            <table>
-              <thead>
-                <tr>
-                  <th>S.No</th>
-                  <th>P Name</th>
-                  <th>Bio</th>
-                  <th>specialization</th>
-                  <th>P Mobile No.</th>
-                  <th>examination duration</th>
-                  <th>price</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedSearchResults.map((result, index) => (
-                  <tr key={result.id}>
-                    <td>{(currentPage - 1) * PerPage + index + 1}</td>
-                    <td>{`${result.name}`}</td>
-                    <td>{`${result.bio}`}</td>
-                    <td>{specializationNames[result.specializationId] || 'Loading...'}</td>
-                    <td>{result.phoneNumber}</td>
-                    <td>{result.examinationduration}</td>
-                    <td>{result.price}</td>
-                    <td>
-                      <button
-                        className="btn user-btn complete-btn"
-                        onClick={() => handleBookNow(result)} // Pass the doctor object
-                      >
-                        Book Now <FaClock />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="pagination">{renderPagination()}</div>
+        <div className='cont-big'>
+          <div className='con-inn'>
+            <label htmlFor="specialization">Specialization:</label>
+            <select
+              id="specialization"
+              value={selectedSpecialization}
+              onChange={(e) => setSelectedSpecialization(e.target.value)}
+            >
+              <option value="">All Specializations</option>
+              {specializations.map((spec) => (
+                <option key={spec.id} value={spec.id}>
+                  {spec.specializationName}
+                </option>
+              ))}
+            </select>
           </div>
-        ):(
-          <Empty message="No appointments found." />
+          <div className='con-inn'>
+            <label htmlFor="country">Country:</label>
+            <select
+              id="country"
+              value={selectedCountry}
+              onChange={handleCountryChange}
+            >
+              <option value="">All Countries</option>
+              {countries.map((country) => (
+                <option key={country.id} value={country.id}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className='con-inn'>
+            <label htmlFor="city">City:</label>
+            <select
+              id="city"
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              disabled={!selectedCountry}
+            >
+              <option value="">All Cities</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button className='btn form-btn' onClick={handleSearch}>
+            Search <FaSearch />
+          </button>
+        </div>
+
+        <div className="container notif-section">
+          {errorMessage ? ( // Check if there is an error message
+            <Empty message={errorMessage} />
+          ) : searchResults.length > 0 ? (
+            <div className="appointments">
+              <table>
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>P Name</th>
+                    <th>Bio</th>
+                    <th>Specialization</th>
+                    <th>P Mobile No.</th>
+                    <th>Examination Duration</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedSearchResults.map((result, index) => (
+                    <tr key={result.id}>
+                      <td>{(currentPage - 1) * PerPage + index + 1}</td>
+                      <td>{result.name}</td>
+                      <td>{result.bio}</td>
+                      <td>{specializationNames[result.specializationId] || 'Loading...'}</td>
+                      <td>{result.phoneNumber}</td>
+                      <td>{result.examinationduration}</td>
+                      <td>{result.price}</td>
+                      <td>
+                        <button
+                          className="btn user-btn complete-btn"
+                          onClick={() => handleBookNow(result)}
+                        >
+                          Book Now <FaClock />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="pagination">{renderPagination()}</div>
+            </div>
+          ) : (
+            <Empty message="No doctors found." />
+          )}
+        </div>
+
+        {showBooking && (
+          <BookingPage
+            doctor={selectedDoctor}
+            onClose={handleCloseBooking}
+          />
         )}
       </div>
- {/* Booking Page (Conditional Rendering) */}
-    {showBooking && (
-      <BookingPage
-        doctor={selectedDoctor} // Pass the selected doctor object
-        onClose={handleCloseBooking}
-      />
-    )}
-    </div>
 
-    <div className="">
       <Footer />
-    </div>
-
-  </>
-
+    </>
+  );
 }
+
 export default SearchPage;
