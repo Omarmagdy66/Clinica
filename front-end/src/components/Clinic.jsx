@@ -105,7 +105,7 @@ function ClinicsPage() {
 
   const handleExistFromClinic = async (clinicId) => {
     try {
-      await axios.delete(`/Doctor/ExitFromClinic?clinicid=${parseInt(clinicId)}`, {
+      await axios.delete(`/Doctor/ExistFromClinic?clinicid=${clinicId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -168,13 +168,9 @@ function ClinicsPage() {
     );
 
       // Handle successful clinic selection (e.g., show a success message, update UI)
-      if(response.data === "the Clinic is already Exits"){
-        toast.error("the Clinic is already Exist!");
-      }else{
       toast.success("Clinic selected successfully!");
-      console.log("Clinic selection response:", response.data);
-      console.log(response.data)
-    }
+      console.log("Clinic selection response:", response.data); 
+
     } catch (error) {
       console.error("Error selecting clinic:", error);
       toast.error("Failed to select clinic. Please try again.");

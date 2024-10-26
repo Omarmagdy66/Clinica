@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios"; // Import axios for the POST request
 import "../styles/contact.css";
 
 const Contact = () => {
@@ -9,55 +8,26 @@ const Contact = () => {
     message: "",
   });
 
-  const [responseMessage, setResponseMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
   const inputChange = (e) => {
     const { name, value } = e.target;
-    setFormDetails({
+    return setFormDetails({
       ...formDetails,
       [name]: value,
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setIsLoading(true);
-    setResponseMessage("");
-
-    try {
-      const payload = {
-        name: formDetails.name,
-        email: formDetails.email,
-        queryText: formDetails.message,
-      };
-
-      // Make the POST request to the API using axios
-      const response = await axios.post('http://clinica.runasp.net/api/Query/Create', payload, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status === 200) {
-        setResponseMessage("Your message has been sent successfully!");
-        setFormDetails({ name: "", email: "", message: "" });
-      }
-    } catch (error) {
-      setResponseMessage("An error occurred. Please try again.");
-      console.error(error); // Log the error for debugging
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <section className="register-section flex-center" id="contact">
+    <section
+      className="register-section flex-center"
+      id="contact"
+    >
       <div className="contact-container flex-center contact">
         <h2 className="form-heading">Contact Us</h2>
-        <form className="register-form" onSubmit={handleSubmit}>
+        <form
+          method="POST"
+          action={`https://formspree.io/f/${process.env.REACT_FORMIK_SECRET}`}
+          className="register-form "
+        >
           <input
             type="text"
             name="name"
@@ -65,7 +35,6 @@ const Contact = () => {
             placeholder="Enter your name"
             value={formDetails.name}
             onChange={inputChange}
-            required
           />
           <input
             type="email"
@@ -74,9 +43,9 @@ const Contact = () => {
             placeholder="Enter your email"
             value={formDetails.email}
             onChange={inputChange}
-            required
           />
           <textarea
+            type="text"
             name="message"
             className="form-input"
             placeholder="Enter your message"
@@ -84,14 +53,15 @@ const Contact = () => {
             onChange={inputChange}
             rows="8"
             cols="12"
-            required
           ></textarea>
 
-          <button type="submit" className="btn form-btn" disabled={isLoading}>
-            {isLoading ? "Sending..." : "Send"}
+          <button
+            type="submit"
+            className="btn form-btn"
+          >
+            send
           </button>
         </form>
-        {responseMessage && <p className="response-message">{responseMessage}</p>}
       </div>
     </section>
   );

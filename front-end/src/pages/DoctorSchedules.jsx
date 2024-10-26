@@ -144,12 +144,8 @@ function DoctorSchedules() {
       });
       toast.success("Schedule added successfully!");
     } catch (error) {
-      if(error.response.data==="A conflicting schedule exists for the same date and time range."){
-        toast.error("A conflicting schedule exists for the same date and time range.");
-      }else{
       console.error("Error adding schedule:", error);
       toast.error("Failed to add schedule. Please try again.");
-    }
       // TODO: Add better error handling, e.g., show a more specific error message, maybe with details from error.response
     }
   };

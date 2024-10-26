@@ -10,6 +10,7 @@ import { FaClock, FaSearch } from 'react-icons/fa';
 import BookingPage from './BookingPage';
 
 function SearchPage() {
+
   const [searchResults, setSearchResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const PerPage = 4;
@@ -20,18 +21,19 @@ function SearchPage() {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [specializationNames, setSpecializationNames] = useState({});
-  const [showBooking, setShowBooking] = useState(false); 
-  const [selectedDoctor, setSelectedDoctor] = useState(null); 
-  const [noDataMessage, setNoDataMessage] = useState(''); // State for the "no data" message
+  const [showBooking, setShowBooking] = useState(false); // State to control the booking page visibility
+  const [selectedDoctor, setSelectedDoctor] = useState(null); // State to store the selected doctor's data
 
   useEffect(() => {
     const fetchSpecializations = async () => {
       try {
         const response = await axios.get(`/Specialization`);
         setSpecializations(response.data);
-        response.data.forEach((data) => {
-          getSpecialization(data.id);
-        });
+        console.log(response.data);
+
+        response.data.map((data) => {
+          getSpecialization(data.id)
+        })
       } catch (error) {
         console.error('Error fetching specializations:', error);
       }
@@ -41,6 +43,8 @@ function SearchPage() {
       try {
         const response = await axios.get('Country/GetAllCountries');
         setCountries(response.data);
+        console.log(response.data);
+
       } catch (error) {
         console.error('Error fetching countries:', error);
       }
@@ -58,6 +62,8 @@ function SearchPage() {
       if (countryId) {
         const response = await axios.get(`/Cites/GetCityByCountryId?countryId=${countryId}`);
         setCities(response.data);
+        console.log(response.data);
+
       } else {
         setCities([]);
       }
@@ -74,6 +80,8 @@ function SearchPage() {
     try {
       const response = await axios.get(`/Specialization/${id}`);
       const specializationName = response.data.specializationName;
+      console.log(response.data);
+
       setSpecializationNames(prevNames => ({ ...prevNames, [id]: specializationName }));
       return specializationName;
     } catch (error) {
@@ -84,6 +92,7 @@ function SearchPage() {
 
   const handleSearch = async () => {
     try {
+      // Construct the URL with query parameters
       const searchUrl = `http://clinica.runasp.net/api/Doctor/DoctorSearch?`;
       const queryParams = new URLSearchParams();
       if (selectedSpecialization) {
@@ -96,25 +105,16 @@ function SearchPage() {
         queryParams.append('city', selectedCity);
       }
 
+      // Make the API call
       const response = await axios.get(searchUrl + queryParams.toString());
       setSearchResults(response.data);
-
-      // Check if response data is empty or not
-      if (response.data.length === 0) {
-        setNoDataMessage('No doctors found matching your criteria.');
-      } else {
-        setNoDataMessage('');
-      }
     } catch (error) {
-      console.log(error.response.data);
-      setNoDataMessage('No doctors found matching your criteria.');
-        setSearchResults([])
-  // if (error.response.data === "There are no doctors in this Specialization") {
-        
-  //     } 
       console.error('Error fetching search results:', error);
-    
+      // Handle the error, e.g., show an error message to the user
     }
+
+    console.log(searchResults);
+
   };
 
   const totalPages = Math.ceil(searchResults.length / PerPage);
@@ -141,19 +141,20 @@ function SearchPage() {
   );
 
   const handleBookNow = async (doctor) => {
-    setSelectedDoctor(doctor); 
-    setShowBooking(true); 
+    setSelectedDoctor(doctor); // Store the selected doctor's data
+    setShowBooking(true); // Show the BookingPage
   };
 
   const handleCloseBooking = () => {
-    setShowBooking(false); 
-    setSelectedDoctor(null); 
+    setShowBooking(false); // Hide the BookingPage
+    setSelectedDoctor(null); // Clear the selected doctor
   };
 
   return <>
     <Navbar />
 
     <div className="search-page">
+      {/* Add a container for styling */}
       <h1>Search</h1>
 
       <div className='cont-big'>
@@ -165,6 +166,7 @@ function SearchPage() {
             onChange={(e) => setSelectedSpecialization(e.target.value)}
           >
             <option value="">All Specializations</option>
+
             {specializations.map((spec) => (
               <option key={spec.id} value={spec.id}>
                 {spec.specializationName}
@@ -179,7 +181,8 @@ function SearchPage() {
             value={selectedCountry}
             onChange={handleCountryChange}
           >
-            <option value="">All Countries</option>
+            <option value="">All
+              Countries</option>
             {countries.map((country) => (
               <option key={country.id} value={country.id}>
                 {country.name}
@@ -189,6 +192,7 @@ function SearchPage() {
         </div>
         <div className='con-inn'>
           <label htmlFor="city">City:</label>
+
           <select
             id="city"
             value={selectedCity}
@@ -205,7 +209,6 @@ function SearchPage() {
         </div>
         <button className='btn form-btn' onClick={handleSearch}>Search <FaSearch /></button>
       </div>
-
       <div className="container notif-section">
         {searchResults.length > 0 ? (
           <div className="appointments">
@@ -235,7 +238,7 @@ function SearchPage() {
                     <td>
                       <button
                         className="btn user-btn complete-btn"
-                        onClick={() => handleBookNow(result)} 
+                        onClick={() => handleBookNow(result)} // Pass the doctor object
                       >
                         Book Now <FaClock />
                       </button>
@@ -246,24 +249,24 @@ function SearchPage() {
             </table>
             <div className="pagination">{renderPagination()}</div>
           </div>
-        ) : (
-          // Display the noDataMessage if it's not empty
-          <Empty message={noDataMessage || "No appointments found."} /> 
+        ):(
+          <Empty message="No appointments found." />
         )}
       </div>
-
-      {showBooking && (
-        <BookingPage
-          doctor={selectedDoctor} 
-          onClose={handleCloseBooking}
-        />
-      )}
+ {/* Booking Page (Conditional Rendering) */}
+    {showBooking && (
+      <BookingPage
+        doctor={selectedDoctor} // Pass the selected doctor object
+        onClose={handleCloseBooking}
+      />
+    )}
     </div>
 
     <div className="">
       <Footer />
     </div>
-  </>
-}
 
+  </>
+
+}
 export default SearchPage;
