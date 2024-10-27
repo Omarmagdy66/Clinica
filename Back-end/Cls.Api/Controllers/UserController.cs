@@ -59,10 +59,8 @@ public class UserController : APIBaseController
     public async Task<IActionResult> PatientRegister(PatientRegesterDto dto)
     {
         var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == dto.UserName || u.Email == dto.Email);
-        if (user1.UserName == dto.UserName)
-            return BadRequest("Username already Exist!");
-        else if(user1.Email == dto.Email)
-            return BadRequest("Email already Exist!");
+        if (user1 != null)
+            return BadRequest("Username Or Email already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
@@ -90,10 +88,8 @@ public class UserController : APIBaseController
     public async Task<IActionResult> CreateDoctorAsync(DoctorRegisterDto dto)
     {
         var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == dto.UserName || u.Email == dto.Email);
-        if (user1.UserName == dto.UserName)
-            return BadRequest("Username already Exist!");
-        else if (user1.Email == dto.Email)
-            return BadRequest("Email already Exist!");
+        if (user1 != null)
+            return BadRequest("Username or Email already Exist!");
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         User user = new User()
         {
@@ -119,6 +115,7 @@ public class UserController : APIBaseController
         _unitOfWork.Save();
         return Ok("Created");
     }
+
     [HttpPost("NurseRegister")]
     public async Task<IActionResult> CreateNurseAsync(NurseRegesterDto dto)
     {
