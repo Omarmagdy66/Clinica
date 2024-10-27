@@ -16,7 +16,7 @@ const Doctors = () => {
 
   const fetchAllDocs = async () => {
     dispatch(setLoading(true));
-    const data = await fetchData(`https://clinica.runasp.net/api/Doctor/GetAllDoctors`,{
+    const data = await fetchData(`http://clinica.runasp.net/api/Doctor/GetAllDoctors`,{
       headers: {
         'Content-Type': 'application/json'
       }});

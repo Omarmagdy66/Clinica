@@ -48,7 +48,7 @@ function Login() {
       }
   
       const { data } = await toast.promise(
-        axios.post("https://clinica.runasp.net/api/User/Login", {
+        axios.post("http://clinica.runasp.net/api/User/Login", {
           userName:email,
           password,
           // role,
@@ -89,13 +89,13 @@ function Login() {
     try {
       
       if(role === 'doctor'){
-        const temp = await axios.get(`https://clinica.runasp.net/api/Doctor/GetDoctorById?id=${parseInt(id)}`);
+        const temp = await axios.get(`http://clinica.runasp.net/api/Doctor/GetDoctorById?id=${parseInt(id)}`);
         console.log(temp);
         dispatch(setUserInfo(temp));
         
       }
       if(role === 'Patient'){
-        const temp = await axios.get(`https://clinica.runasp.net/api/Patient/GetPatientById?id=${parseInt(id)}`);
+        const temp = await axios.get(`http://clinica.runasp.net/api/Patient/GetPatientById?id=${parseInt(id)}`);
         console.log(temp);
         dispatch(setUserInfo(temp));
         
@@ -103,7 +103,7 @@ function Login() {
       console.log(role);
       
       // if(role === 'Admin'){
-      //   // const temp = await axios.get(`https://clinica.runasp.net/api/Patient/GetPatientById?id=${parseInt(id)}`);
+      //   // const temp = await axios.get(`http://clinica.runasp.net/api/Patient/GetPatientById?id=${parseInt(id)}`);
       //   // console.log(temp);
       //   dispatch(setUserInfo({
       //     role: 'Admin',

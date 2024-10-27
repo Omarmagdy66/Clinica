@@ -73,7 +73,7 @@ function RegisterAsDoctor() {
       
     
       const { data } = await toast.promise(
-        axios.post("https://clinica.runasp.net/api/User/DoctorRegister",{
+        axios.post("http://clinica.runasp.net/api/User/DoctorRegister",{
           name,
           phoneNumber,
           email,
@@ -93,7 +93,7 @@ function RegisterAsDoctor() {
       console.log(data);
 
       // try {
-      //   const da = await axios.post('https://clinica.runasp.net/api/User/PatientRegister',{ name,
+      //   const da = await axios.post('http://clinica.runasp.net/api/User/PatientRegister',{ name,
       //         phoneNumber,
       //         email,
       //         password,

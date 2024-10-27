@@ -88,7 +88,7 @@ function SearchPage() {
 
   const handleSearch = async () => {
     try {
-      const searchUrl = `https://clinica.runasp.net/api/Doctor/DoctorSearch?`;
+      const searchUrl = `http://clinica.runasp.net/api/Doctor/DoctorSearch?`;
       const queryParams = new URLSearchParams();
 
       if (selectedSpecialization) queryParams.append('Specialization', selectedSpecialization);

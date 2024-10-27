@@ -62,7 +62,7 @@ const ApplyDoctor = () => {
       
       await toast.promise(
         axios.post(
-          "https://clinica.runasp.net/api/Doctor/RequestApplyDoctor", // Updated API endpoint
+          "http://clinica.runasp.net/api/Doctor/RequestApplyDoctor", // Updated API endpoint
           requestData,
           {
             headers: {
