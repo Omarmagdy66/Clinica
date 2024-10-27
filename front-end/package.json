@@ -1,9 +1,12 @@
 {
+  "homepage": "https://Omarmagdy66/github.io/Clinica",
   "name": "front-end",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -25,6 +28,7 @@
     "axios": "^1.2.5",
     "chart.js": "^4.4.2",
     "firebase": "^9.15.0",
+    "gh-pages": "^6.2.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^3.1.2",
     "moment": "^2.30.1",
