@@ -35,7 +35,7 @@ function ClinicsPage() {
       try {
         dispatch(setLoading(true));
         const response = await axios.get(
-          "http://clinica.runasp.net/api/Clinic/GetAllClinics" // Replace with your API endpoint for getting all clinics
+          "https://clinica.runasp.net/api/Clinic/GetAllClinics" // Replace with your API endpoint for getting all clinics
         );
       
         setClinics(response.data);
@@ -50,7 +50,7 @@ function ClinicsPage() {
     const fetchCountries = async () => {
         try {
           const response = await axios.get(
-            "http://clinica.runasp.net/api/Country/GetAllCountries"
+            "https://clinica.runasp.net/api/Country/GetAllCountries"
           );
           setCountries(response.data);
         } catch (error) {
@@ -83,7 +83,7 @@ function ClinicsPage() {
     try {
       if (countryId) {
         const response = await axios.get(
-          `http://clinica.runasp.net/api/Cites/GetCityByCountryId?countryid=${countryId}`
+          `https://clinica.runasp.net/api/Cites/GetCityByCountryId?countryid=${countryId}`
         );
         setCities(response.data);
       } else {
@@ -127,7 +127,7 @@ function ClinicsPage() {
         
       dispatch(setLoading(true));
       const response = await axios.post(
-        "http://clinica.runasp.net/api/Doctor/RequestClinic", // Replace with your API endpoint for adding a clinic
+        "https://clinica.runasp.net/api/Doctor/RequestClinic", // Replace with your API endpoint for adding a clinic
         newClinic,{
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`, // Include authentication header if needed
@@ -157,7 +157,7 @@ function ClinicsPage() {
       // Assuming you have an API endpoint to associate a doctor with a clinic
       // Replace the endpoint and request body with your actual API call
       const response = await axios.post(
-        `http://clinica.runasp.net/api/Doctor/RequestClinic?clinicid=${selectedClinic}`,
+        `https://clinica.runasp.net/api/Doctor/RequestClinic?clinicid=${selectedClinic}`,
         null, // No data in the request body
         { 
             headers: { 
