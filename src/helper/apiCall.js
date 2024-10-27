@@ -1,6 +1,6 @@
 import axios from "axios";
 
-axios.defaults.baseURL ="http://clinica.runasp.net/api"
+axios.defaults.baseURL ="https://clinica.runasp.net/api"
 
 const fetchData = async (url) => {
   const { data } = await axios.get(url, {

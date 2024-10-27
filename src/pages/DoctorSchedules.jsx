@@ -11,7 +11,7 @@ import moment from "moment";
 import jwtDecode from "jwt-decode";
 import Empty from "../components/Empty";
 
-axios.defaults.baseURL = "http://clinica.runasp.net/api";
+axios.defaults.baseURL = "https://clinica.runasp.net/api";
 
 function DoctorSchedules() {
   const [clinics, setClinics] = useState([]);

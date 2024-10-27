@@ -31,7 +31,7 @@ const AdminQueries = () => {
       if (confirm) {
         await toast.promise(
           axios.put(
-            `http://clinica.runasp.net/api/Query/SolveQuery?id=${queryId}`,
+            `https://clinica.runasp.net/api/Query/SolveQuery?id=${queryId}`,
           ),
             {
             success: "Query marked as solved",
