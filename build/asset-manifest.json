@@ -1,0 +1,40 @@
+{
+  "files": {
+    "main.css": "/github.io/Clinica/front-end/static/css/main.da01e9cb.css",
+    "main.js": "/github.io/Clinica/front-end/static/js/main.075ae573.js",
+    "static/css/824.62df506f.chunk.css": "/github.io/Clinica/front-end/static/css/824.62df506f.chunk.css",
+    "static/js/824.924e09cd.chunk.js": "/github.io/Clinica/front-end/static/js/824.924e09cd.chunk.js",
+    "static/js/139.f4613e57.chunk.js": "/github.io/Clinica/front-end/static/js/139.f4613e57.chunk.js",
+    "static/css/672.5052bb30.chunk.css": "/github.io/Clinica/front-end/static/css/672.5052bb30.chunk.css",
+    "static/js/672.430d751c.chunk.js": "/github.io/Clinica/front-end/static/js/672.430d751c.chunk.js",
+    "static/js/670.963ca8e7.chunk.js": "/github.io/Clinica/front-end/static/js/670.963ca8e7.chunk.js",
+    "static/js/442.d4534f03.chunk.js": "/github.io/Clinica/front-end/static/js/442.d4534f03.chunk.js",
+    "static/js/477.0a3cb0e2.chunk.js": "/github.io/Clinica/front-end/static/js/477.0a3cb0e2.chunk.js",
+    "static/css/696.859cd729.chunk.css": "/github.io/Clinica/front-end/static/css/696.859cd729.chunk.css",
+    "static/js/696.c7c875de.chunk.js": "/github.io/Clinica/front-end/static/js/696.c7c875de.chunk.js",
+    "static/css/30.822e6e9b.chunk.css": "/github.io/Clinica/front-end/static/css/30.822e6e9b.chunk.css",
+    "static/js/30.b3188d14.chunk.js": "/github.io/Clinica/front-end/static/js/30.b3188d14.chunk.js",
+    "static/media/logo.png": "/github.io/Clinica/front-end/static/media/logo.7d6b7b9af4c18ce15fd5.png",
+    "static/media/heroimg.jpg": "/github.io/Clinica/front-end/static/media/heroimg.8bbd2437f7c9d842026c.jpg",
+    "static/media/aboutimg.jpg": "/github.io/Clinica/front-end/static/media/aboutimg.af2db4b9f307d04f8745.jpg",
+    "index.html": "/github.io/Clinica/front-end/index.html",
+    "main.da01e9cb.css.map": "/github.io/Clinica/front-end/static/css/main.da01e9cb.css.map",
+    "main.075ae573.js.map": "/github.io/Clinica/front-end/static/js/main.075ae573.js.map",
+    "824.62df506f.chunk.css.map": "/github.io/Clinica/front-end/static/css/824.62df506f.chunk.css.map",
+    "824.924e09cd.chunk.js.map": "/github.io/Clinica/front-end/static/js/824.924e09cd.chunk.js.map",
+    "139.f4613e57.chunk.js.map": "/github.io/Clinica/front-end/static/js/139.f4613e57.chunk.js.map",
+    "672.5052bb30.chunk.css.map": "/github.io/Clinica/front-end/static/css/672.5052bb30.chunk.css.map",
+    "672.430d751c.chunk.js.map": "/github.io/Clinica/front-end/static/js/672.430d751c.chunk.js.map",
+    "670.963ca8e7.chunk.js.map": "/github.io/Clinica/front-end/static/js/670.963ca8e7.chunk.js.map",
+    "442.d4534f03.chunk.js.map": "/github.io/Clinica/front-end/static/js/442.d4534f03.chunk.js.map",
+    "477.0a3cb0e2.chunk.js.map": "/github.io/Clinica/front-end/static/js/477.0a3cb0e2.chunk.js.map",
+    "696.859cd729.chunk.css.map": "/github.io/Clinica/front-end/static/css/696.859cd729.chunk.css.map",
+    "696.c7c875de.chunk.js.map": "/github.io/Clinica/front-end/static/js/696.c7c875de.chunk.js.map",
+    "30.822e6e9b.chunk.css.map": "/github.io/Clinica/front-end/static/css/30.822e6e9b.chunk.css.map",
+    "30.b3188d14.chunk.js.map": "/github.io/Clinica/front-end/static/js/30.b3188d14.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.da01e9cb.css",
+    "static/js/main.075ae573.js"
+  ]
+}

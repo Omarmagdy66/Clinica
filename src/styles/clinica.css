@@ -1,0 +1,38 @@
+.user-section{
+  margin: 30px auto;
+}
+.clinic-options-container {
+  display: flex;
+  justify-content: space-around; /* Distribute space around the items */
+  align-items: center; /* Vertically align items */
+  width: 90%;
+  
+}
+
+.clinic-option {
+  width: 50%; /* Each option takes roughly half the width */
+  padding: 10px;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0; /* Add some vertical margin */
+}
+
+.separator span {
+  padding: 0 20px; /* Add some horizontal padding */
+  font-weight: bold;
+}
+
+.clinic-option-select{
+
+}
+.clinic-option-select .option-select{
+   width: 100%;
+}
+.clinic-option-select .btn{
+  width: 100%;
+  margin: 10px 4px;
+}
