@@ -107,7 +107,8 @@ function Register() {
           email,
           password,
           userName: name,
-          birthday
+          birthday,
+          gender
         },{
           headers: {
             'Content-Type': 'application/json'
