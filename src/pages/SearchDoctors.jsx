@@ -202,7 +202,7 @@ function SearchPage() {
           </button>
         </div>
 
-        <div className="container notif-section">
+        <div className="container">
           {errorMessage ? ( // Check if there is an error message
             <Empty message={errorMessage} />
           ) : searchResults.length > 0 ? (
