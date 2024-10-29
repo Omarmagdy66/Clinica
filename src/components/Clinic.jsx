@@ -105,7 +105,7 @@ function ClinicsPage() {
 
   const handleExistFromClinic = async (clinicId) => {
     try {
-      await axios.delete(`/Doctor/ExistFromClinic?clinicid=${clinicId}`, {
+      await axios.delete(`/Doctor/ExitFromClinic?clinicid=${parseInt(clinicId)}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
