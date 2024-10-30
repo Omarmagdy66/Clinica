@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using System.Linq.Expressions;
+using System.Numerics;
 using System.Security.Claims;
 
 namespace Controllers;
@@ -100,7 +101,7 @@ public class PatientController : APIBaseController
         if (ModelState.IsValid)
         {
             // Update only the fields that have been provided in the DTO
-            if (!string.IsNullOrEmpty(patientdto.Name))
+            if (!string.IsNullOrEmpty(patientdto.Name) && patient.Name != patientdto.Name)
             {
                 var user1 = await _unitOfWork.Users.FindAsync(u => u.UserName == patientdto.Name);
                 if (user1 != null)
@@ -109,7 +110,7 @@ public class PatientController : APIBaseController
                 user.UserName = patientdto.Name;
             }
 
-            if (!string.IsNullOrEmpty(patientdto.Email))
+            if (!string.IsNullOrEmpty(patientdto.Email) && patient.Email != patientdto.Email)
             {
                 var user1 = await _unitOfWork.Users.FindAsync(u => u.Email == patientdto.Email);
                 if (user1 !=null)
@@ -118,30 +119,25 @@ public class PatientController : APIBaseController
                 user.Email = patientdto.Email;
             }
 
-            if (patientdto.Birthday.HasValue)
+            if (patientdto.Birthday.HasValue && patient.Birthday != patientdto.Birthday)
             {
                 patient.Birthday = patientdto.Birthday.Value;
             }
 
-            if (!string.IsNullOrEmpty(patientdto.Gender))
+            if (!string.IsNullOrEmpty(patientdto.Gender) && patient.Gender != patientdto.Gender)
             {
                 patient.Gender = patientdto.Gender;
             }
 
-            if (!string.IsNullOrEmpty(patientdto.Password))
+            if (!string.IsNullOrEmpty(patientdto.Password) && !BCrypt.Net.BCrypt.Verify(patientdto.Password, patient.Password))
             {
                 patient.Password = BCrypt.Net.BCrypt.HashPassword(patientdto.Password);
                 user.Password = BCrypt.Net.BCrypt.HashPassword(patientdto.Password);
             }
 
-            if (!string.IsNullOrEmpty(patientdto.PhoneNumber))
+            if (!string.IsNullOrEmpty(patientdto.PhoneNumber) && patient.PhoneNumber != patientdto.PhoneNumber)
             {
                 patient.PhoneNumber = patientdto.PhoneNumber;
-            }
-
-            if (patientdto.RegistrationDate.HasValue)
-            {
-                patient.RegistrationDate = patientdto.RegistrationDate.Value;
             }
 
             // Update the patient entity in the database

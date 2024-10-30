@@ -104,13 +104,12 @@ public class AppointmentController : APIBaseController
             _unitOfWork.Save();
 
             var doctor = await _unitOfWork.Doctors.GetByIdAsync((int)appointmentdto.DoctorId);
-            var clinic = await _unitOfWork.Clinics.FindAsync(c => c.DoctorCLinics.Any(d => d.DoctorId == doctor.Id));
 
             // Send Email
             var Email = new EmailDto()
             { 
               Subject = "Appointment Confirmation",
-                Body = $"Dear {patient.Name},<br><br>Your appointment with Dr. {doctor.Name} has been confirmed for {appointmentdto.AppointmentDate.ToString("dd/MM/yyyy")} at {appointmentdto.TimeSlot}. Please ensure you arrive on time.<br><br>Thank you for choosing Clinica.<br><br>Best regards,<br>Care Clinic",
+                Body = $"Dear {patient.Name},<br><br>Your appointment with Dr. {doctor.Name} has been confirmed for {appointmentdto.AppointmentDate.ToString("dd/MM/yyyy")} at {appointmentdto.TimeSlot}. Please ensure you arrive on time.<br><br>Thank you for choosing Clinica.<br><br>Best regards,<br>CLINICA",
                 To = patient.Email
             }; 
             _emailService.SendEmail(Email);  
@@ -404,17 +403,12 @@ public class AppointmentController : APIBaseController
         appointment.Status = "Completed";
         _unitOfWork.Appointments.Update(appointment);
         _unitOfWork.Save();
-        var schedule = await _unitOfWork.Schedules.FindAsync(s =>
-        s.DoctorId == appointment.DoctorId &&
-        s.Day == appointment.AppointmentDate.Value.Date &&  // Ensure the same day
-        s.AvailableFrom <= appointment.TimeSlot && s.AvailableTo > appointment.TimeSlot);
         var patient = await _unitOfWork.Patients.GetByIdAsync(appointment.PatientId);
         var doctor = await _unitOfWork.Doctors.GetByIdAsync((int)appointment.DoctorId);
-        var clinic = await _unitOfWork.Clinics.FindAsync(c => c.Id == schedule.ClinicId);
         var Email = new EmailDto()
         {
-            Subject = $"Appointment Completed: Dr. {doctor.Name}, {appointment.AppointmentDate.Value.ToString("dd / MM / yyyy")}",
-            Body = $"Dear {patient.Name},<br><br>We hope your appointment with Dr. {doctor.Name} on {appointment.AppointmentDate.Value.ToString("dd/MM/yyyy")} at {appointment.TimeSlot} was successful.<br><br>If you have any feedback or further questions, please don't hesitate to reach out to us.<br><br>Thank you for choosing Clinica, and we look forward to serving you again in the future.<br><br>Best regards,<br>{clinic.ClinicName} Clinic",
+            Subject = $"Appointment Completed: Dr. {doctor.Name}, {appointment.AppointmentDate.Value.ToString("dd/MM/yyyy")}",
+            Body = $"Dear {patient.Name},<br><br>We hope your appointment with Dr. {doctor.Name} on {appointment.AppointmentDate.Value.ToString("dd/MM/yyyy")} at {appointment.TimeSlot} was successful.<br><br>If you have any feedback or further questions, please don't hesitate to reach out to us.<br><br>Thank you for choosing Clinica, and we look forward to serving you again in the future.<br><br>Best regards,<br>CLINICA",
             To = patient.Email
         };
         _emailService.SendEmail(Email);

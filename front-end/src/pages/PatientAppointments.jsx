@@ -69,7 +69,7 @@ const PatientAppointments = () => {
   const handleCancelAppointment = async (id) => {
     try {
       // Make API call to cancel the appointment
-      const response = await axios.put(`http://clinica.runasp.net/api/Appointment/CancelAppointment?id=${id}`, null, {
+      const response = await axios.put(`https://clinica.runasp.net/api/Appointment/CancelAppointment?id=${id}`, null, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

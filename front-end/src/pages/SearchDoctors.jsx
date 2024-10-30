@@ -88,7 +88,7 @@ function SearchPage() {
 
   const handleSearch = async () => {
     try {
-      const searchUrl = `http://clinica.runasp.net/api/Doctor/DoctorSearch?`;
+      const searchUrl = `https://clinica.runasp.net/api/Doctor/DoctorSearch?`;
       const queryParams = new URLSearchParams();
 
       if (selectedSpecialization) queryParams.append('Specialization', selectedSpecialization);
@@ -167,13 +167,13 @@ function SearchPage() {
             </select>
           </div>
           <div className='con-inn'>
-            <label htmlFor="country">Country:</label>
+            <label htmlFor="country">City:</label>
             <select
               id="country"
               value={selectedCountry}
               onChange={handleCountryChange}
             >
-              <option value="">All Countries</option>
+              <option value="">All Cities</option>
               {countries.map((country) => (
                 <option key={country.id} value={country.id}>
                   {country.name}
@@ -182,14 +182,14 @@ function SearchPage() {
             </select>
           </div>
           <div className='con-inn'>
-            <label htmlFor="city">City:</label>
+            <label htmlFor="city">Area:</label>
             <select
               id="city"
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
               disabled={!selectedCountry}
             >
-              <option value="">All Cities</option>
+              <option value="">All Areas</option>
               {cities.map((city) => (
                 <option key={city.id} value={city.id}>
                   {city.name}
@@ -202,7 +202,7 @@ function SearchPage() {
           </button>
         </div>
 
-        <div className="container notif-section">
+        <div className="container">
           {errorMessage ? ( // Check if there is an error message
             <Empty message={errorMessage} />
           ) : searchResults.length > 0 ? (

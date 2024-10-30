@@ -102,7 +102,7 @@ function BookingPage({ doctor, onClose }) {
       // console.log(tokenId);
       // let tokenId = jwt_decode(localStorage.getItem('token')).id
         
-      const response = await axios.get(`http://clinica.runasp.net/api/Patient/GetPatientById?id=${tokenId}`)
+      const response = await axios.get(`https://clinica.runasp.net/api/Patient/GetPatientById?id=${tokenId}`)
       setPatientData(response.data)
       console.log(response.data);
 

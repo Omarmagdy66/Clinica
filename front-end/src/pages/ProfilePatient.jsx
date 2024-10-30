@@ -75,14 +75,18 @@ function ProfilePatient() {
       const { name, email, birthday, mobile, gender, password ,confpassword} = formDetails; // Removed confpassword
 
 
-      if (!email) {
-        return toast.error("Email should not be empty");
-      } else if (name.length < 3) {
-        return toast.error("First name must be at least 3 characters long");
-      } else if (password.length < 1) {
-        return toast.error("Password must be at least 5 characters long");
-      } else if (password !== confpassword) {
-        return toast.error("Passwords do not match");
+      // if (!email) {
+      //   return toast.error("Email should not be empty");
+      // } else if (name.length < 3) {
+      //   return toast.error("First name must be at least 3 characters long");
+      // } else 
+      if(password.length > 0){
+        if (password.length < 5 ) {
+          return toast.error("Password must be at least 5 characters long");
+        } else if (password !== confpassword) {
+          return toast.error("Passwords do not match");
+        }
+        
       }
       const updatedData = {
         name: name,

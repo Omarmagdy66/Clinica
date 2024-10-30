@@ -57,7 +57,7 @@ function Profile() {
         email: temp.email || "",
         phoneNumber: temp.phoneNumber || "",
         bio: temp.bio || "",
-        price: temp.price || 0,
+        price: temp.price || null,
         password: "",
         confpassword: "",
       });
@@ -85,16 +85,19 @@ function Profile() {
       e.preventDefault();
       const { specializationId, examinationduration, name, email, password, phoneNumber, bio, price, confpassword } = formDetails;
 
-      // Validation
-      if (!email) {
-        return toast.error("Email should not be empty");
-      } else if (name.length < 3) {
-        return toast.error("Name must be at least 3 characters long");
-      } else if (password.length < 1) {
+      // // Validation
+      // if (!email) {
+      //   return toast.error("Email should not be empty");
+      // } else if (name.length < 3) {
+      //   return toast.error("Name must be at least 3 characters long");
+      // } else
+      if(password.length>0){
+      if (password.length < 5) {
         return toast.error("Password must be at least 5 characters long");
       } else if (password !== confpassword) {
         return toast.error("Passwords do not match");
       }
+    }
 
       const updatedData = {
         specializationId: specializationId,

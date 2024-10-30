@@ -165,7 +165,7 @@ namespace Controllers
                     user.UserName = doctordto.Name;
                 }
 
-                if (!string.IsNullOrEmpty(doctordto.Password) && BCrypt.Net.BCrypt.Verify(doctordto.Password, doctor.Password))
+                if (!string.IsNullOrEmpty(doctordto.Password) && !BCrypt.Net.BCrypt.Verify(doctordto.Password, doctor.Password))
                 {
                     var hashpass = BCrypt.Net.BCrypt.HashPassword(doctordto.Password);
                     doctor.Password = hashpass;
@@ -456,7 +456,6 @@ namespace Controllers
 
 
         [HttpDelete("ExitFromClinic")]
-        [Authorize(Roles = "3")]
         public async Task<IActionResult> ExitFromClinic(int clinicid)
         {
             var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
@@ -504,7 +503,7 @@ namespace Controllers
             }
             else if (Specialization != null && Country == null && city == null)
             {
-                var Doctors = await _unitOfWork.Doctors.FindAllAsync(n => n.SpecializationId == Specialization);
+                var Doctors = await _unitOfWork.Doctors.FindAllAsync(n => n.SpecializationId == Specialization && n.Bio != null && n.SpecializationId != null && n.Examinationduration != null && n.Price != null);
                 if (Doctors == null || !Doctors.Any())
                     return BadRequest("There are no doctors in this Specialization");
                 return Ok(Doctors);
@@ -512,28 +511,28 @@ namespace Controllers
             }
             else if (Country != null && Specialization == null && city == null)
             {
-                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d => d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country));
+                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d => d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country) && d.Bio != null && d.SpecializationId != null && d.Examinationduration != null && d.Price != null);
                 if (Doctors == null || !Doctors.Any())
                     return BadRequest("There are no doctors in this Country");
                 return Ok(Doctors);
             }
             else if (Country != null && Specialization == null && city != null)
             {
-                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d => d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country && dc.Clinic.CityId == city));
+                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d => d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country && dc.Clinic.CityId == city) && d.Bio != null && d.SpecializationId != null && d.Examinationduration != null && d.Price != null);
                 if (Doctors == null || !Doctors.Any())
                     return BadRequest("There are no doctors in this City");
                 return Ok(Doctors);
             }
             else if (Country != null && Specialization != null && city == null)
             {
-                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d =>d.SpecializationId == Specialization && d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country));
+                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d =>d.SpecializationId == Specialization && d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country) && d.Bio != null && d.SpecializationId != null && d.Examinationduration != null && d.Price != null);
                 if (Doctors == null || !Doctors.Any())
                     return BadRequest("There are no doctors in this City");
                 return Ok(Doctors);
             }
             else if (Country != null && Specialization != null && city != null)
             {
-                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d => d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country && dc.Clinic.CityId == city && d.SpecializationId == Specialization));
+                var Doctors = await _unitOfWork.Doctors.FindAllAsync(d => d.DoctorCLinics.Any(dc => dc.Clinic.CountryId == Country && dc.Clinic.CityId == city && d.SpecializationId == Specialization) && d.Bio != null && d.SpecializationId != null && d.Examinationduration != null && d.Price != null);
                 if (Doctors == null || !Doctors.Any())
                     return BadRequest("There are no doctors");
                 return Ok(Doctors);

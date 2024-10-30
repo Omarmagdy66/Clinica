@@ -29,7 +29,7 @@ const BookAppointment = ({ setModalOpen, ele }) => {
     try {
       await toast.promise(
         axios.post(
-          "http://clinica.runasp.net/api/Appointment/byDoctor/:doctorId",
+          "https://clinica.runasp.net/api/Appointment/byDoctor/:doctorId",
           {
             doctorId: ele?.userId?._id,
             date: formDetails.date,
