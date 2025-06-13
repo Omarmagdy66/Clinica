@@ -82,6 +82,9 @@ const Navbar = () => {
                 <li>
                   <NavLink to={"/applyfordoctor"}>Apply for doctor</NavLink>
                 </li>
+                <li>
+                  <NavLink to={"/image-models"}>Medical Image Analysis</NavLink>
+                </li>
               </>)}
             
               {isDoctor !== false &&(<>
@@ -101,6 +104,7 @@ const Navbar = () => {
                 <li>
                 <NavLink to={"/profile"}>Profile</NavLink>
               </li>
+              <li><NavLink to={"/image-models"}>Medical Image Analysis</NavLink></li>
               </>)}
               <li>
                 <HashLink to={"/#contact"}>Contact Us</HashLink>
@@ -126,6 +130,7 @@ const Navbar = () => {
               <li>
                 <NavLink to={"/patient/profile"}>Profile</NavLink>
               </li>
+              <li><NavLink to={"/image-models"}>Medical Image Analysis</NavLink></li>
               {/* <li>
                 <NavLink to={"/ChangePassword"}>ChangePassword</NavLink>
               </li> */}

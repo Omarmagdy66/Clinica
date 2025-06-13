@@ -16,6 +16,7 @@ import SearchDoctors from "./pages/SearchDoctors.jsx";
 import PatientAppointments from "./pages/PatientAppointments.jsx";
 import ProfilePatient from "./pages/ProfilePatient.jsx";
 import DoctorSchedules from "./pages/DoctorSchedules.jsx";
+import ChatBot from "./components/ChatBot.jsx";
 
 const Aprofile = lazy(()=>import("./components/Aprofile.jsx"))
 const Home = lazy(() => import("./pages/Home.jsx"));
@@ -27,6 +28,7 @@ const DasHome = lazy(() => import("./components/Home.jsx"));
 const Notifications = lazy(() => import("./pages/Notifications.jsx"));
 const ApplyDoctor = lazy(() => import("./pages/ApplyDoctor.jsx"));
 const Error = lazy(() => import("./pages/Error.jsx"));
+const ImageModels = lazy(() => import("./pages/ImageModels.jsx"));
 
 function App() {
   const [userRole, setUserRole] = useState("");
@@ -207,9 +209,18 @@ function App() {
               </Admin>
             }
           />
+          <Route
+            path="/image-models"
+            element={
+              <Protected>
+                <ImageModels />
+              </Protected>
+            }
+          />
           <Route path="*" element={<Error />} />
         </Routes>
       </Suspense>
+      <ChatBot />
     </Router>
   );
 }

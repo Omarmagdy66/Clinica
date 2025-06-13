@@ -1,0 +1,30 @@
+<div class="chatbot-container">
+  <div class="chat-messages" #chatMessages>
+    <div *ngFor="let message of messages" 
+         [ngClass]="{'message': true, 'user-message': message.isUser, 'bot-message': !message.isUser}">
+      <div class="message-content">
+        {{ message.text }}
+      </div>
+    </div>
+    <div *ngIf="isLoading" class="message bot-message">
+      <div class="message-content">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="chatForm" (ngSubmit)="sendMessage()" class="chat-input">
+    <input type="text" 
+           formControlName="message" 
+           placeholder="اكتب رسالتك هنا..."
+           [disabled]="isLoading">
+    <button type="submit" 
+            [disabled]="!chatForm.valid || isLoading">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </form>
+</div> 
